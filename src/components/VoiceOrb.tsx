@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Loader2, Keyboard } from "lucide-react";
+import { Loader2, Keyboard, Square } from "lucide-react";
 
 interface VoiceOrbProps {
   isListening: boolean;
@@ -7,6 +7,7 @@ interface VoiceOrbProps {
   isProcessing?: boolean;
   speechSupported?: boolean;
   onClick: () => void;
+  onStopSpeaking?: () => void;
 }
 
 export const VoiceOrb = ({ 
@@ -14,10 +15,19 @@ export const VoiceOrb = ({
   isSpeaking, 
   isProcessing = false, 
   speechSupported = true,
-  onClick 
+  onClick,
+  onStopSpeaking
 }: VoiceOrbProps) => {
   const isActive = isListening || isSpeaking || isProcessing;
-  const isDisabled = isSpeaking || isProcessing;
+  const isDisabled = isProcessing;
+
+  const handleClick = () => {
+    if (isSpeaking && onStopSpeaking) {
+      onStopSpeaking();
+    } else {
+      onClick();
+    }
+  };
 
   return (
     <div className="relative flex items-center justify-center">
@@ -45,7 +55,7 @@ export const VoiceOrb = ({
 
       {/* Main orb container */}
       <button
-        onClick={onClick}
+        onClick={handleClick}
         disabled={isDisabled}
         className={cn(
           "relative w-40 h-40 rounded-full transition-all duration-500",
@@ -111,6 +121,13 @@ export const VoiceOrb = ({
           </div>
         )}
 
+        {/* Stop icon when speaking */}
+        {isSpeaking && !isProcessing && (
+          <div className="relative z-10 text-primary-foreground">
+            <Square className="w-8 h-8 fill-current" />
+          </div>
+        )}
+
         {/* Center icon */}
         {!isSpeaking && !isProcessing && (
           <div className="relative z-10 text-primary-foreground">
@@ -144,7 +161,7 @@ export const VoiceOrb = ({
           {isProcessing
             ? "Thinking..."
             : isSpeaking
-            ? "AI is speaking..."
+            ? "Tap to stop"
             : isListening
             ? "Listening... tap to stop"
             : !speechSupported
