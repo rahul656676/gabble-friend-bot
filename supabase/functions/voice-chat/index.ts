@@ -21,6 +21,32 @@ serve(async (req) => {
 
     console.log('Processing chat request with messages:', messages.length);
 
+    // Ensure messages alternate between user and assistant
+    // Perplexity requires strict alternation after system message
+    const cleanedMessages: { role: string; content: string }[] = [];
+    let lastRole = 'system'; // Start after system message
+    
+    for (const msg of messages) {
+      if (msg.role === 'user' && lastRole !== 'user') {
+        cleanedMessages.push({ role: 'user', content: msg.content });
+        lastRole = 'user';
+      } else if (msg.role === 'assistant' && lastRole === 'user') {
+        cleanedMessages.push({ role: 'assistant', content: msg.content });
+        lastRole = 'assistant';
+      }
+    }
+
+    // Ensure we end with a user message (the current query)
+    if (cleanedMessages.length === 0 || cleanedMessages[cleanedMessages.length - 1].role !== 'user') {
+      // Find the last user message from original messages
+      const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+      if (lastUserMsg && (cleanedMessages.length === 0 || cleanedMessages[cleanedMessages.length - 1].content !== lastUserMsg.content)) {
+        cleanedMessages.push({ role: 'user', content: lastUserMsg.content });
+      }
+    }
+
+    console.log('Cleaned messages count:', cleanedMessages.length);
+
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
@@ -34,7 +60,7 @@ serve(async (req) => {
             role: 'system', 
             content: 'You are a helpful AI voice assistant with access to real-time web search. Keep your responses concise and conversational, suitable for spoken dialogue. Aim for 1-3 sentences unless more detail is specifically needed. Be friendly, helpful, and always provide accurate, up-to-date information.' 
           },
-          ...messages,
+          ...cleanedMessages,
         ],
       }),
     });
@@ -53,7 +79,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log('Perplexity response:', JSON.stringify(data, null, 2));
+    console.log('Perplexity response received');
     
     const aiResponse = data.choices?.[0]?.message?.content || 'I apologize, I could not generate a response.';
     
