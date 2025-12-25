@@ -2,10 +2,15 @@ import { VoiceOrb } from "@/components/VoiceOrb";
 import { ConversationPanel } from "@/components/ConversationPanel";
 import { FeatureCard } from "@/components/FeatureCard";
 import { TextInput } from "@/components/TextInput";
-import { Mic, Brain, Zap, Shield, Globe, Sparkles } from "lucide-react";
+import { QuickReplies } from "@/components/QuickReplies";
+import { SettingsPanel } from "@/components/SettingsPanel";
+import { Mic, Brain, Zap, Shield, Globe, Sparkles, BarChart3 } from "lucide-react";
 import { useVoiceAgent } from "@/hooks/useVoiceAgent";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
   const {
     isListening,
     isSpeaking,
@@ -16,6 +21,11 @@ const Index = () => {
     handleOrbClick,
     handleStopSpeaking,
     sendTextMessage,
+    giveFeedback,
+    clearChat,
+    preferences,
+    updatePreferences,
+    availableVoices,
   } = useVoiceAgent();
 
   const features = [
@@ -53,6 +63,23 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Settings Panel */}
+      <SettingsPanel
+        preferences={preferences}
+        onUpdatePreferences={updatePreferences}
+        availableVoices={availableVoices}
+      />
+
+      {/* Analytics Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => navigate('/analytics')}
+        className="fixed top-4 right-16 z-50 glass hover:bg-secondary/50"
+      >
+        <BarChart3 className="w-5 h-5" />
+      </Button>
+
       {/* Background grid pattern */}
       <div 
         className="absolute inset-0 bg-grid-pattern opacity-30"
@@ -98,7 +125,22 @@ const Index = () => {
             />
           </div>
 
-          <ConversationPanel messages={messages} isVisible={messages.length > 0} />
+          <ConversationPanel 
+            messages={messages} 
+            isVisible={messages.length > 0}
+            onFeedback={giveFeedback}
+            onClear={clearChat}
+          />
+          
+          {/* Quick Replies */}
+          {hasStarted && !isProcessing && !isSpeaking && (
+            <div className="w-full mt-6 animate-fade-in">
+              <QuickReplies 
+                onSelect={(msg) => sendTextMessage(msg, true)} 
+                disabled={isProcessing || isSpeaking}
+              />
+            </div>
+          )}
           
           {/* Text input - always visible after first interaction */}
           {hasStarted && (
