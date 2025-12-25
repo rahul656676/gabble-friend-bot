@@ -1,14 +1,21 @@
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Loader2, Keyboard } from "lucide-react";
 
 interface VoiceOrbProps {
   isListening: boolean;
   isSpeaking: boolean;
   isProcessing?: boolean;
+  speechSupported?: boolean;
   onClick: () => void;
 }
 
-export const VoiceOrb = ({ isListening, isSpeaking, isProcessing = false, onClick }: VoiceOrbProps) => {
+export const VoiceOrb = ({ 
+  isListening, 
+  isSpeaking, 
+  isProcessing = false, 
+  speechSupported = true,
+  onClick 
+}: VoiceOrbProps) => {
   const isActive = isListening || isSpeaking || isProcessing;
   const isDisabled = isSpeaking || isProcessing;
 
@@ -104,11 +111,13 @@ export const VoiceOrb = ({ isListening, isSpeaking, isProcessing = false, onClic
           </div>
         )}
 
-        {/* Center icon - mic when idle/listening, stop when listening */}
+        {/* Center icon */}
         {!isSpeaking && !isProcessing && (
           <div className="relative z-10 text-primary-foreground">
             {isListening ? (
               <div className="w-6 h-6 rounded-sm bg-primary-foreground/90" />
+            ) : !speechSupported ? (
+              <Keyboard className="w-8 h-8" />
             ) : (
               <svg
                 width="32"
@@ -138,6 +147,8 @@ export const VoiceOrb = ({ isListening, isSpeaking, isProcessing = false, onClic
             ? "AI is speaking..."
             : isListening
             ? "Listening... tap to stop"
+            : !speechSupported
+            ? "Use text input below"
             : "Tap to speak"}
         </p>
       </div>

@@ -51,6 +51,7 @@ export const useVoiceAgent = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [hasStarted, setHasStarted] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(true);
   const { toast } = useToast();
   
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
@@ -99,13 +100,9 @@ export const useVoiceAgent = () => {
     } catch (error) {
       console.error('Error playing audio:', error);
       setIsSpeaking(false);
-      toast({
-        title: 'Audio Error',
-        description: 'Failed to play audio response',
-        variant: 'destructive',
-      });
+      // Don't show toast for audio errors to avoid spam - text is still shown in chat
     }
-  }, [toast]);
+  }, []);
 
   const getAIResponse = useCallback(async (userMessage: string) => {
     try {
@@ -135,20 +132,37 @@ export const useVoiceAgent = () => {
       
       setMessages(prev => [...prev, assistantMessage]);
       
-      // Play the response
+      // Try to play the response (will fail silently if TTS unavailable)
       await playAudio(aiResponse);
       
     } catch (error) {
       console.error('Error getting AI response:', error);
       toast({
         title: 'Error',
-        description: 'Failed to get AI response',
+        description: 'Failed to get AI response. Please try again.',
         variant: 'destructive',
       });
     } finally {
       setIsProcessing(false);
     }
   }, [messages, playAudio, toast]);
+
+  const sendTextMessage = useCallback(async (text: string) => {
+    if (!text.trim() || isProcessing || isSpeaking) return;
+    
+    if (!hasStarted) {
+      setHasStarted(true);
+    }
+    
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: text.trim(),
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, userMessage]);
+    await getAIResponse(text.trim());
+  }, [hasStarted, isProcessing, isSpeaking, getAIResponse]);
 
   const startListening = useCallback(async () => {
     try {
@@ -161,10 +175,11 @@ export const useVoiceAgent = () => {
       const SpeechRecognitionAPI = windowWithSpeech.SpeechRecognition || windowWithSpeech.webkitSpeechRecognition;
       
       if (!SpeechRecognitionAPI) {
+        setSpeechSupported(false);
         toast({
-          title: 'Not Supported',
-          description: 'Speech recognition is not supported in this browser. Please use Chrome or Edge.',
-          variant: 'destructive',
+          title: 'Voice Not Supported',
+          description: 'Use the text input below to chat with the AI.',
+          variant: 'default',
         });
         return;
       }
@@ -194,14 +209,13 @@ export const useVoiceAgent = () => {
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
+        setSpeechSupported(false);
         
-        if (event.error !== 'aborted') {
-          toast({
-            title: 'Recognition Error',
-            description: `Speech recognition error: ${event.error}`,
-            variant: 'destructive',
-          });
-        }
+        toast({
+          title: 'Voice Recognition Unavailable',
+          description: 'Please use the text input below to chat.',
+          variant: 'default',
+        });
       };
 
       recognition.onend = () => {
@@ -225,10 +239,11 @@ export const useVoiceAgent = () => {
 
     } catch (error) {
       console.error('Error starting speech recognition:', error);
+      setSpeechSupported(false);
       toast({
-        title: 'Microphone Error',
-        description: 'Failed to access microphone. Please check permissions.',
-        variant: 'destructive',
+        title: 'Voice Recognition Unavailable',
+        description: 'Please use the text input below to chat.',
+        variant: 'default',
       });
     }
   }, [toast, getAIResponse]);
@@ -246,7 +261,7 @@ export const useVoiceAgent = () => {
 
     if (!hasStarted) {
       setHasStarted(true);
-      const greeting = "Hello! I'm your AI voice assistant. Tap the orb and speak when you're ready.";
+      const greeting = "Hello! I'm your AI voice assistant. How can I help you today?";
       
       const assistantMessage: Message = {
         id: Date.now().toString(),
@@ -256,13 +271,14 @@ export const useVoiceAgent = () => {
       };
       setMessages([assistantMessage]);
       
+      // Try to play greeting
       await playAudio(greeting);
     } else if (isListening) {
       stopListening();
-    } else {
+    } else if (speechSupported) {
       await startListening();
     }
-  }, [hasStarted, isListening, isSpeaking, isProcessing, startListening, stopListening, playAudio]);
+  }, [hasStarted, isListening, isSpeaking, isProcessing, speechSupported, startListening, stopListening, playAudio]);
 
   return {
     isListening,
@@ -270,6 +286,8 @@ export const useVoiceAgent = () => {
     isProcessing,
     messages,
     hasStarted,
+    speechSupported,
     handleOrbClick,
+    sendTextMessage,
   };
 };

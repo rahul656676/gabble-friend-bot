@@ -1,6 +1,7 @@
 import { VoiceOrb } from "@/components/VoiceOrb";
 import { ConversationPanel } from "@/components/ConversationPanel";
 import { FeatureCard } from "@/components/FeatureCard";
+import { TextInput } from "@/components/TextInput";
 import { Mic, Brain, Zap, Shield, Globe, Sparkles } from "lucide-react";
 import { useVoiceAgent } from "@/hooks/useVoiceAgent";
 
@@ -10,7 +11,10 @@ const Index = () => {
     isSpeaking,
     isProcessing,
     messages,
+    hasStarted,
+    speechSupported,
     handleOrbClick,
+    sendTextMessage,
   } = useVoiceAgent();
 
   const features = [
@@ -81,17 +85,29 @@ const Index = () => {
         </header>
 
         {/* Voice orb section */}
-        <section className="flex flex-col items-center justify-center mb-20">
-          <div className="mb-24">
+        <section className="flex flex-col items-center justify-center mb-12">
+          <div className="mb-20">
             <VoiceOrb
               isListening={isListening}
               isSpeaking={isSpeaking}
               isProcessing={isProcessing}
               onClick={handleOrbClick}
+              speechSupported={speechSupported}
             />
           </div>
 
           <ConversationPanel messages={messages} isVisible={messages.length > 0} />
+          
+          {/* Text input - always visible after first interaction */}
+          {hasStarted && (
+            <div className="w-full mt-6 animate-fade-in">
+              <TextInput 
+                onSend={sendTextMessage} 
+                disabled={isProcessing || isSpeaking}
+                placeholder={!speechSupported ? "Type your message..." : "Or type your message here..."}
+              />
+            </div>
+          )}
         </section>
 
         {/* Features section */}
