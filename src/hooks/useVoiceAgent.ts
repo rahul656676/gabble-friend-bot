@@ -72,6 +72,22 @@ export const useVoiceAgent = () => {
   }, [messages]);
 
   // Use browser's built-in speech synthesis with preferences
+  // Clean text for speech - remove special characters that get pronounced
+  const cleanTextForSpeech = (text: string): string => {
+    return text
+      .replace(/\*\*/g, '') // Remove bold markers
+      .replace(/\*/g, '')   // Remove single asterisks
+      .replace(/_{2,}/g, '') // Remove underscores used for emphasis
+      .replace(/#{1,6}\s?/g, '') // Remove markdown headers
+      .replace(/`{1,3}/g, '') // Remove code backticks
+      .replace(/~~/g, '')   // Remove strikethrough
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to just text
+      .replace(/[•◦▪▫●○■□]/g, '') // Remove bullet points
+      .replace(/[\u2022\u2023\u25E6\u2043\u2219]/g, '') // Remove more bullet characters
+      .replace(/\s{2,}/g, ' ') // Collapse multiple spaces
+      .trim();
+  };
+
   const speak = useCallback((text: string): Promise<void> => {
     return new Promise<void>((resolve) => {
       if (!('speechSynthesis' in window)) {
@@ -83,7 +99,9 @@ export const useVoiceAgent = () => {
       // Cancel any ongoing speech
       window.speechSynthesis.cancel();
 
-      const utterance = new SpeechSynthesisUtterance(text);
+      // Clean the text before speaking
+      const cleanedText = cleanTextForSpeech(text);
+      const utterance = new SpeechSynthesisUtterance(cleanedText);
       
       // Apply user preferences
       utterance.rate = preferences.voiceRate;
