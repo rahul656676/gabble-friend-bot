@@ -12,29 +12,35 @@ interface Message {
 }
 
 const Index = () => {
-  const [isActive, setIsActive] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [hasStarted, setHasStarted] = useState(false);
 
   const handleOrbClick = useCallback(() => {
-    if (!isActive) {
-      setIsActive(true);
-      // Simulate conversation start
+    if (!hasStarted) {
+      // First click - start listening and show greeting
+      setHasStarted(true);
+      setIsListening(true);
+      
       setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
+        setIsListening(false);
+        setIsSpeaking(true);
+        setMessages([
           {
             id: Date.now().toString(),
             role: "assistant",
-            content: "Hello! I'm your AI voice assistant. How can I help you today?",
+            content: "Hello! I'm your AI voice assistant. Tap the orb and speak when you're ready.",
             timestamp: new Date(),
           },
         ]);
-        setIsSpeaking(true);
         setTimeout(() => setIsSpeaking(false), 2000);
       }, 500);
-    } else {
-      // Simulate user message
+    } else if (isListening) {
+      // Currently listening - stop and process
+      setIsListening(false);
+      
+      // Simulate receiving user speech
       setMessages((prev) => [
         ...prev,
         {
@@ -45,6 +51,7 @@ const Index = () => {
         },
       ]);
       
+      // Simulate AI response
       setTimeout(() => {
         setIsSpeaking(true);
         setMessages((prev) => [
@@ -57,9 +64,12 @@ const Index = () => {
           },
         ]);
         setTimeout(() => setIsSpeaking(false), 3000);
-      }, 1000);
+      }, 500);
+    } else {
+      // Not listening - start listening
+      setIsListening(true);
     }
-  }, [isActive]);
+  }, [hasStarted, isListening]);
 
   const features = [
     {
@@ -132,7 +142,7 @@ const Index = () => {
         <section className="flex flex-col items-center justify-center mb-20">
           <div className="mb-24">
             <VoiceOrb
-              isActive={isActive}
+              isListening={isListening}
               isSpeaking={isSpeaking}
               onClick={handleOrbClick}
             />
