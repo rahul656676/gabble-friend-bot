@@ -6,25 +6,32 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const personalityPrompts: Record<string, string> = {
+  helpful: 'You are a helpful, friendly AI voice assistant. Be informative and supportive.',
+  professional: 'You are a professional AI assistant. Be formal, precise, and business-oriented.',
+  casual: 'You are a casual, friendly AI buddy. Be relaxed, use conversational language, and be fun.',
+  creative: 'You are a creative and imaginative AI. Be expressive, think outside the box, and inspire.',
+  concise: 'You are a concise expert. Give brief, direct answers. No fluff, just facts.',
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, personality = 'helpful', language = 'en-US' } = await req.json();
     const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
     
     if (!PERPLEXITY_API_KEY) {
       throw new Error('PERPLEXITY_API_KEY is not configured');
     }
 
-    console.log('Processing chat request with messages:', messages.length);
+    console.log('Processing chat request with messages:', messages.length, 'personality:', personality);
 
     // Ensure messages alternate between user and assistant
-    // Perplexity requires strict alternation after system message
     const cleanedMessages: { role: string; content: string }[] = [];
-    let lastRole = 'system'; // Start after system message
+    let lastRole = 'system';
     
     for (const msg of messages) {
       if (msg.role === 'user' && lastRole !== 'user') {
@@ -36,9 +43,8 @@ serve(async (req) => {
       }
     }
 
-    // Ensure we end with a user message (the current query)
+    // Ensure we end with a user message
     if (cleanedMessages.length === 0 || cleanedMessages[cleanedMessages.length - 1].role !== 'user') {
-      // Find the last user message from original messages
       const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
       if (lastUserMsg && (cleanedMessages.length === 0 || cleanedMessages[cleanedMessages.length - 1].content !== lastUserMsg.content)) {
         cleanedMessages.push({ role: 'user', content: lastUserMsg.content });
@@ -46,6 +52,9 @@ serve(async (req) => {
     }
 
     console.log('Cleaned messages count:', cleanedMessages.length);
+
+    const personalityPrompt = personalityPrompts[personality] || personalityPrompts.helpful;
+    const languageName = language.split('-')[0] === 'en' ? 'English' : language;
 
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
@@ -58,7 +67,7 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: 'You are a helpful AI voice assistant with access to real-time web search. Keep your responses concise and conversational, suitable for spoken dialogue. Aim for 1-3 sentences unless more detail is specifically needed. Be friendly, helpful, and always provide accurate, up-to-date information.' 
+            content: `${personalityPrompt} You have access to real-time web search. Keep responses concise and conversational (1-3 sentences unless more detail is needed). Always respond in ${languageName}.` 
           },
           ...cleanedMessages,
         ],
