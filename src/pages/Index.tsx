@@ -1,11 +1,176 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useCallback } from "react";
+import { VoiceOrb } from "@/components/VoiceOrb";
+import { ConversationPanel } from "@/components/ConversationPanel";
+import { FeatureCard } from "@/components/FeatureCard";
+import { Mic, Brain, Zap, Shield, Globe, Sparkles } from "lucide-react";
+
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+}
 
 const Index = () => {
+  const [isActive, setIsActive] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const handleOrbClick = useCallback(() => {
+    if (!isActive) {
+      setIsActive(true);
+      // Simulate conversation start
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            role: "assistant",
+            content: "Hello! I'm your AI voice assistant. How can I help you today?",
+            timestamp: new Date(),
+          },
+        ]);
+        setIsSpeaking(true);
+        setTimeout(() => setIsSpeaking(false), 2000);
+      }, 500);
+    } else {
+      // Simulate user message
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: "user",
+          content: "Tell me about your capabilities.",
+          timestamp: new Date(),
+        },
+      ]);
+      
+      setTimeout(() => {
+        setIsSpeaking(true);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: "I can help you with a wide range of tasks! I'm capable of natural conversation, answering questions, providing information, and assisting with various requests. Just speak naturally and I'll do my best to help.",
+            timestamp: new Date(),
+          },
+        ]);
+        setTimeout(() => setIsSpeaking(false), 3000);
+      }, 1000);
+    }
+  }, [isActive]);
+
+  const features = [
+    {
+      icon: Mic,
+      title: "Natural Voice",
+      description: "Speak naturally and get instant responses with human-like voice synthesis.",
+    },
+    {
+      icon: Brain,
+      title: "Advanced AI",
+      description: "Powered by state-of-the-art language models for intelligent conversations.",
+    },
+    {
+      icon: Zap,
+      title: "Real-time",
+      description: "Ultra-low latency responses for seamless, natural dialogue flow.",
+    },
+    {
+      icon: Shield,
+      title: "Private & Secure",
+      description: "Your conversations are encrypted and never stored or shared.",
+    },
+    {
+      icon: Globe,
+      title: "Multilingual",
+      description: "Communicate in multiple languages with accurate translations.",
+    },
+    {
+      icon: Sparkles,
+      title: "Always Learning",
+      description: "Continuously improving to provide better assistance over time.",
+    },
+  ];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Background grid pattern */}
+      <div 
+        className="absolute inset-0 bg-grid-pattern opacity-30"
+        style={{ backgroundSize: "50px 50px" }}
+      />
+      
+      {/* Ambient glow effects */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-glow-secondary/10 rounded-full blur-3xl" />
+
+      {/* Main content */}
+      <div className="relative z-10 container mx-auto px-4 py-12">
+        {/* Hero section */}
+        <header className="text-center mb-16 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6">
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-sm font-medium text-muted-foreground">
+              AI Voice Agent
+            </span>
+          </div>
+          
+          <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            <span className="text-gradient">Talk</span> with{" "}
+            <span className="text-foreground">Intelligence</span>
+          </h1>
+          
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+            Experience the future of conversation. Our AI voice agent understands you,
+            responds naturally, and helps you accomplish more.
+          </p>
+        </header>
+
+        {/* Voice orb section */}
+        <section className="flex flex-col items-center justify-center mb-20">
+          <div className="mb-24">
+            <VoiceOrb
+              isActive={isActive}
+              isSpeaking={isSpeaking}
+              onClick={handleOrbClick}
+            />
+          </div>
+
+          <ConversationPanel messages={messages} isVisible={messages.length > 0} />
+        </section>
+
+        {/* Features section */}
+        <section className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Powerful <span className="text-gradient">Capabilities</span>
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Built with cutting-edge technology to deliver an exceptional voice experience.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, index) => (
+              <FeatureCard
+                key={feature.title}
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+                delay={index * 100}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="mt-24 text-center">
+          <p className="text-sm text-muted-foreground">
+            Powered by advanced AI technology
+          </p>
+        </footer>
       </div>
     </div>
   );
