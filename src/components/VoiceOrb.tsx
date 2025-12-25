@@ -1,13 +1,16 @@
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 interface VoiceOrbProps {
   isListening: boolean;
   isSpeaking: boolean;
+  isProcessing?: boolean;
   onClick: () => void;
 }
 
-export const VoiceOrb = ({ isListening, isSpeaking, onClick }: VoiceOrbProps) => {
-  const isActive = isListening || isSpeaking;
+export const VoiceOrb = ({ isListening, isSpeaking, isProcessing = false, onClick }: VoiceOrbProps) => {
+  const isActive = isListening || isSpeaking || isProcessing;
+  const isDisabled = isSpeaking || isProcessing;
 
   return (
     <div className="relative flex items-center justify-center">
@@ -28,18 +31,26 @@ export const VoiceOrb = ({ isListening, isSpeaking, onClick }: VoiceOrbProps) =>
         </>
       )}
 
+      {/* Processing glow */}
+      {isProcessing && (
+        <div className="absolute w-48 h-48 rounded-full bg-primary/20 animate-pulse" />
+      )}
+
       {/* Main orb container */}
       <button
         onClick={onClick}
+        disabled={isDisabled}
         className={cn(
           "relative w-40 h-40 rounded-full transition-all duration-500",
           "flex items-center justify-center",
           "bg-gradient-to-br from-primary/20 to-cyan-500/10",
           "border border-primary/30",
-          "hover:scale-105 active:scale-95",
+          !isDisabled && "hover:scale-105 active:scale-95 cursor-pointer",
+          isDisabled && "cursor-not-allowed opacity-90",
           "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-4 focus:ring-offset-background",
           isListening && "animate-pulse-glow scale-110",
-          isSpeaking && "scale-105 border-glow-secondary/50"
+          isSpeaking && "scale-105 border-glow-secondary/50",
+          isProcessing && "scale-105"
         )}
       >
         {/* Inner gradient orb */}
@@ -53,6 +64,8 @@ export const VoiceOrb = ({ isListening, isSpeaking, onClick }: VoiceOrbProps) =>
               ? "conic-gradient(from 0deg, hsl(175 80% 50%), hsl(200 80% 45%), hsl(260 80% 60%), hsl(175 80% 50%))"
               : isSpeaking
               ? "conic-gradient(from 0deg, hsl(260 80% 60%), hsl(280 80% 55%), hsl(175 80% 50%), hsl(260 80% 60%))"
+              : isProcessing
+              ? "conic-gradient(from 0deg, hsl(45 80% 50%), hsl(30 80% 55%), hsl(175 80% 50%), hsl(45 80% 50%))"
               : "linear-gradient(135deg, hsl(175 80% 50%), hsl(200 80% 45%))",
             animation: isActive ? "orb-rotate 4s linear infinite" : "none",
           }}
@@ -84,8 +97,15 @@ export const VoiceOrb = ({ isListening, isSpeaking, onClick }: VoiceOrbProps) =>
           </div>
         )}
 
-        {/* Center icon - mic when idle/listening, pause when speaking */}
-        {!isSpeaking && (
+        {/* Processing spinner */}
+        {isProcessing && (
+          <div className="relative z-10 text-primary-foreground">
+            <Loader2 className="w-8 h-8 animate-spin" />
+          </div>
+        )}
+
+        {/* Center icon - mic when idle/listening, stop when listening */}
+        {!isSpeaking && !isProcessing && (
           <div className="relative z-10 text-primary-foreground">
             {isListening ? (
               <div className="w-6 h-6 rounded-sm bg-primary-foreground/90" />
@@ -112,7 +132,9 @@ export const VoiceOrb = ({ isListening, isSpeaking, onClick }: VoiceOrbProps) =>
       {/* Status text */}
       <div className="absolute -bottom-12 text-center">
         <p className="text-sm text-muted-foreground font-medium transition-all duration-300">
-          {isSpeaking
+          {isProcessing
+            ? "Thinking..."
+            : isSpeaking
             ? "AI is speaking..."
             : isListening
             ? "Listening... tap to stop"

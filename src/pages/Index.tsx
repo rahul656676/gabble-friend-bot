@@ -1,75 +1,17 @@
-import { useState, useCallback } from "react";
 import { VoiceOrb } from "@/components/VoiceOrb";
 import { ConversationPanel } from "@/components/ConversationPanel";
 import { FeatureCard } from "@/components/FeatureCard";
 import { Mic, Brain, Zap, Shield, Globe, Sparkles } from "lucide-react";
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-}
+import { useVoiceAgent } from "@/hooks/useVoiceAgent";
 
 const Index = () => {
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [hasStarted, setHasStarted] = useState(false);
-
-  const handleOrbClick = useCallback(() => {
-    if (!hasStarted) {
-      // First click - start listening and show greeting
-      setHasStarted(true);
-      setIsListening(true);
-      
-      setTimeout(() => {
-        setIsListening(false);
-        setIsSpeaking(true);
-        setMessages([
-          {
-            id: Date.now().toString(),
-            role: "assistant",
-            content: "Hello! I'm your AI voice assistant. Tap the orb and speak when you're ready.",
-            timestamp: new Date(),
-          },
-        ]);
-        setTimeout(() => setIsSpeaking(false), 2000);
-      }, 500);
-    } else if (isListening) {
-      // Currently listening - stop and process
-      setIsListening(false);
-      
-      // Simulate receiving user speech
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          role: "user",
-          content: "Tell me about your capabilities.",
-          timestamp: new Date(),
-        },
-      ]);
-      
-      // Simulate AI response
-      setTimeout(() => {
-        setIsSpeaking(true);
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: (Date.now() + 1).toString(),
-            role: "assistant",
-            content: "I can help you with a wide range of tasks! I'm capable of natural conversation, answering questions, providing information, and assisting with various requests. Just speak naturally and I'll do my best to help.",
-            timestamp: new Date(),
-          },
-        ]);
-        setTimeout(() => setIsSpeaking(false), 3000);
-      }, 500);
-    } else {
-      // Not listening - start listening
-      setIsListening(true);
-    }
-  }, [hasStarted, isListening]);
+  const {
+    isListening,
+    isSpeaking,
+    isProcessing,
+    messages,
+    handleOrbClick,
+  } = useVoiceAgent();
 
   const features = [
     {
@@ -144,6 +86,7 @@ const Index = () => {
             <VoiceOrb
               isListening={isListening}
               isSpeaking={isSpeaking}
+              isProcessing={isProcessing}
               onClick={handleOrbClick}
             />
           </div>
