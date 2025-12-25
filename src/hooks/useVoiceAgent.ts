@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -56,10 +56,15 @@ export const useVoiceAgent = () => {
   
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const currentTranscriptRef = useRef<string>('');
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const messagesRef = useRef<Message[]>([]);
+
+  // Keep messagesRef in sync
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   // Use browser's built-in speech synthesis (FREE!)
-  const speak = useCallback((text: string) => {
+  const speak = useCallback((text: string): Promise<void> => {
     return new Promise<void>((resolve) => {
       if (!('speechSynthesis' in window)) {
         console.log('Speech synthesis not supported');
@@ -71,7 +76,6 @@ export const useVoiceAgent = () => {
       window.speechSynthesis.cancel();
 
       const utterance = new SpeechSynthesisUtterance(text);
-      utteranceRef.current = utterance;
       
       // Configure voice settings
       utterance.rate = 1.0;
@@ -102,8 +106,7 @@ export const useVoiceAgent = () => {
         resolve();
       };
 
-      utterance.onerror = (event) => {
-        console.error('Speech synthesis error:', event);
+      utterance.onerror = () => {
         setIsSpeaking(false);
         resolve();
       };
@@ -126,7 +129,7 @@ export const useVoiceAgent = () => {
     try {
       setIsProcessing(true);
       
-      const conversationHistory = messages.map(m => ({
+      const conversationHistory = messagesRef.current.map(m => ({
         role: m.role,
         content: m.content,
       }));
@@ -163,7 +166,7 @@ export const useVoiceAgent = () => {
       });
       setIsProcessing(false);
     }
-  }, [messages, speak, toast]);
+  }, [speak, toast]);
 
   const sendTextMessage = useCallback(async (text: string) => {
     if (!text.trim() || isProcessing || isSpeaking) return;
@@ -184,7 +187,6 @@ export const useVoiceAgent = () => {
 
   const startListening = useCallback(async () => {
     try {
-      // Check for browser support
       const windowWithSpeech = window as typeof window & {
         SpeechRecognition?: SpeechRecognitionConstructor;
         webkitSpeechRecognition?: SpeechRecognitionConstructor;
@@ -237,7 +239,6 @@ export const useVoiceAgent = () => {
       };
 
       recognition.onend = () => {
-        // Only process if we have a transcript
         if (currentTranscriptRef.current.trim()) {
           const userMessage: Message = {
             id: Date.now().toString(),
@@ -277,7 +278,6 @@ export const useVoiceAgent = () => {
   const handleOrbClick = useCallback(async () => {
     if (isProcessing) return;
     
-    // If speaking, stop it
     if (isSpeaking) {
       stopSpeaking();
       return;
@@ -295,7 +295,6 @@ export const useVoiceAgent = () => {
       };
       setMessages([assistantMessage]);
       
-      // Speak greeting
       await speak(greeting);
     } else if (isListening) {
       stopListening();
