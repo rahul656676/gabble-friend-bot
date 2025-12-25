@@ -205,7 +205,7 @@ export const useVoiceAgent = () => {
       }
 
       const recognition = new SpeechRecognitionAPI();
-      recognition.continuous = true;
+      recognition.continuous = false; // Stop after silence detected
       recognition.interimResults = true;
       recognition.lang = 'en-US';
 
@@ -213,11 +213,14 @@ export const useVoiceAgent = () => {
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         let finalTranscript = '';
+        let interimTranscript = '';
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
             finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
           }
         }
 
@@ -229,8 +232,13 @@ export const useVoiceAgent = () => {
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
-        setSpeechSupported(false);
         
+        if (event.error === 'no-speech') {
+          // No speech detected, just stop listening
+          return;
+        }
+        
+        setSpeechSupported(false);
         toast({
           title: 'Voice Recognition Unavailable',
           description: 'Please use the text input below to chat.',
@@ -239,6 +247,8 @@ export const useVoiceAgent = () => {
       };
 
       recognition.onend = () => {
+        setIsListening(false);
+        // Automatically process if there's a transcript
         if (currentTranscriptRef.current.trim()) {
           const userMessage: Message = {
             id: Date.now().toString(),
@@ -249,7 +259,6 @@ export const useVoiceAgent = () => {
           setMessages(prev => [...prev, userMessage]);
           getAIResponse(currentTranscriptRef.current.trim());
         }
-        setIsListening(false);
       };
 
       recognition.start();
@@ -272,7 +281,6 @@ export const useVoiceAgent = () => {
       recognitionRef.current.stop();
       recognitionRef.current = null;
     }
-    setIsListening(false);
   }, []);
 
   const handleOrbClick = useCallback(async () => {
