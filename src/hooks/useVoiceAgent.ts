@@ -75,6 +75,7 @@ export const useVoiceAgent = () => {
   // Clean text for speech - remove special characters that get pronounced
   const cleanTextForSpeech = (text: string): string => {
     return text
+      .replace(/\[\d+\]/g, '') // Remove citation markers like [1], [4], [1][4]
       .replace(/\*\*/g, '') // Remove bold markers
       .replace(/\*/g, '')   // Remove single asterisks
       .replace(/_{2,}/g, '') // Remove underscores used for emphasis
