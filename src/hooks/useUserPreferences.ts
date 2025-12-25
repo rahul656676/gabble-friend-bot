@@ -20,6 +20,7 @@ const defaultPreferences: UserPreferences = {
 export const useUserPreferences = (sessionId: string) => {
   const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences);
   const [loading, setLoading] = useState(true);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(true);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   // Load available voices
@@ -64,9 +65,14 @@ export const useUserPreferences = (sessionId: string) => {
             language: data.language || 'en-US',
             personality: data.personality || 'helpful',
           });
+          setHasCompletedOnboarding(true);
+        } else {
+          // No preferences found, show onboarding
+          setHasCompletedOnboarding(false);
         }
       } catch (error) {
         console.error('Error loading preferences:', error);
+        setHasCompletedOnboarding(false);
       } finally {
         setLoading(false);
       }
@@ -80,6 +86,7 @@ export const useUserPreferences = (sessionId: string) => {
 
     const updated = { ...preferences, ...newPreferences };
     setPreferences(updated);
+    setHasCompletedOnboarding(true);
 
     try {
       const { error } = await supabase
@@ -100,5 +107,5 @@ export const useUserPreferences = (sessionId: string) => {
     }
   }, [sessionId, preferences]);
 
-  return { preferences, updatePreferences, loading, availableVoices };
+  return { preferences, updatePreferences, loading, availableVoices, hasCompletedOnboarding };
 };
