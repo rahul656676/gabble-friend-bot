@@ -76,6 +76,14 @@ export const useVoiceAgent = () => {
   const cleanTextForSpeech = (text: string): string => {
     return text
       .replace(/\[\d+\]/g, '') // Remove citation markers like [1], [4], [1][4]
+      .replace(/\p{Emoji_Presentation}/gu, '') // Remove emojis with presentation
+      .replace(/\p{Emoji}\uFE0F/gu, '') // Remove emojis with variation selector
+      .replace(/[\u{1F600}-\u{1F64F}]/gu, '') // Remove emoticons
+      .replace(/[\u{1F300}-\u{1F5FF}]/gu, '') // Remove misc symbols and pictographs
+      .replace(/[\u{1F680}-\u{1F6FF}]/gu, '') // Remove transport and map symbols
+      .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '') // Remove flags
+      .replace(/[\u{2600}-\u{26FF}]/gu, '') // Remove misc symbols
+      .replace(/[\u{2700}-\u{27BF}]/gu, '') // Remove dingbats
       .replace(/\*\*/g, '') // Remove bold markers
       .replace(/\*/g, '')   // Remove single asterisks
       .replace(/_{2,}/g, '') // Remove underscores used for emphasis
