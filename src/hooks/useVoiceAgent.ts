@@ -327,16 +327,12 @@ export const useVoiceAgent = () => {
       const greetings: Record<string, string> = {
         'en-US': "Hello! I'm your AI voice assistant. How can I help you today?",
         'en-GB': "Hello! I'm your AI voice assistant. How may I assist you?",
+        'hi-IN': "नमस्ते! मैं आपका AI वॉइस असिस्टेंट हूं। मैं आपकी कैसे मदद कर सकता हूं?",
+        'hi-EN': "Namaste! Main aapka AI voice assistant hoon. Aapki kaise help kar sakta hoon?",
         'es-ES': "¡Hola! Soy tu asistente de voz AI. ¿Cómo puedo ayudarte hoy?",
         'fr-FR': "Bonjour! Je suis votre assistant vocal IA. Comment puis-je vous aider?",
         'de-DE': "Hallo! Ich bin Ihr KI-Sprachassistent. Wie kann ich Ihnen helfen?",
-        'it-IT': "Ciao! Sono il tuo assistente vocale AI. Come posso aiutarti?",
         'pt-BR': "Olá! Sou seu assistente de voz AI. Como posso ajudá-lo?",
-        'zh-CN': "你好！我是你的AI语音助手。我能帮你什么？",
-        'ja-JP': "こんにちは！私はあなたのAI音声アシスタントです。何かお手伝いできますか？",
-        'ko-KR': "안녕하세요! 저는 AI 음성 도우미입니다. 무엇을 도와드릴까요?",
-        'hi-IN': "नमस्ते! मैं आपका AI वॉइस असिस्टेंट हूं। मैं आपकी कैसे मदद कर सकता हूं?",
-        'ar-SA': "مرحبا! أنا مساعدك الصوتي AI. كيف يمكنني مساعدتك؟",
       };
       
       const greeting = greetings[preferences.language] || greetings['en-US'];
