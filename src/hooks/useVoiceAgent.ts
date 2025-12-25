@@ -89,7 +89,10 @@ export const useVoiceAgent = () => {
       utterance.rate = preferences.voiceRate;
       utterance.pitch = preferences.voicePitch;
       utterance.volume = 1.0;
-      utterance.lang = preferences.language;
+      
+      // Map Hinglish to Hindi for speech synthesis (browser doesn't support hi-EN)
+      const speechLang = preferences.language === 'hi-EN' ? 'hi-IN' : preferences.language;
+      utterance.lang = speechLang;
 
       // Get the preferred voice
       const voices = window.speechSynthesis.getVoices();
@@ -252,7 +255,10 @@ export const useVoiceAgent = () => {
       const recognition = new SpeechRecognitionAPI();
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = preferences.language;
+      
+      // Map Hinglish to Hindi for speech recognition (browser doesn't support hi-EN)
+      const speechLang = preferences.language === 'hi-EN' ? 'hi-IN' : preferences.language;
+      recognition.lang = speechLang;
 
       currentTranscriptRef.current = '';
 
