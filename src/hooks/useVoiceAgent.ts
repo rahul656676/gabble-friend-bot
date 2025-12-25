@@ -215,7 +215,14 @@ export const useVoiceAgent = () => {
       m.id === messageId ? { ...m, feedback } : m
     ));
     
-    await trackEvent('feedback_given', { messageId, feedback });
+    // Track feedback event with message content for model improvement
+    const message = messagesRef.current.find(m => m.id === messageId);
+    await trackEvent('feedback_given', { 
+      messageId, 
+      feedback,
+      feedbackType: feedback === 1 ? 'helpful' : 'not_helpful',
+      messageContent: message?.content?.substring(0, 200), // First 200 chars for context
+    });
   }, [trackEvent]);
 
   const clearChat = useCallback(() => {
