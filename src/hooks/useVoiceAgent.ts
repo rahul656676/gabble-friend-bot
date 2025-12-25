@@ -59,7 +59,7 @@ export const useVoiceAgent = () => {
   const { toast } = useToast();
   
   const sessionId = useSessionId();
-  const { preferences, updatePreferences, availableVoices } = useUserPreferences(sessionId);
+  const { preferences, updatePreferences, availableVoices, loading: prefsLoading, hasCompletedOnboarding } = useUserPreferences(sessionId);
   const { trackEvent } = useAnalytics(sessionId);
   
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
@@ -382,5 +382,7 @@ export const useVoiceAgent = () => {
     updatePreferences,
     availableVoices,
     sessionId,
+    prefsLoading,
+    hasCompletedOnboarding,
   };
 };
