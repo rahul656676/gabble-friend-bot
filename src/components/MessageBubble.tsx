@@ -9,6 +9,9 @@ interface MessageBubbleProps {
 export const MessageBubble = ({ role, content, timestamp }: MessageBubbleProps) => {
   const isUser = role === "user";
 
+  // Clean content - remove citation markers like [1], [4], [1][4]
+  const cleanContent = content.replace(/\[\d+\]/g, '');
+
   return (
     <div
       className={cn(
@@ -25,7 +28,7 @@ export const MessageBubble = ({ role, content, timestamp }: MessageBubbleProps) 
             : "glass rounded-bl-md"
         )}
       >
-        <p className="text-sm leading-relaxed">{content}</p>
+        <p className="text-sm leading-relaxed">{cleanContent}</p>
         {timestamp && (
           <p
             className={cn(
