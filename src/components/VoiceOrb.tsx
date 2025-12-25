@@ -128,12 +128,10 @@ export const VoiceOrb = ({
           </div>
         )}
 
-        {/* Center icon */}
+        {/* Center icon - show mic when idle or listening */}
         {!isSpeaking && !isProcessing && (
           <div className="relative z-10 text-primary-foreground">
-            {isListening ? (
-              <div className="w-6 h-6 rounded-sm bg-primary-foreground/90" />
-            ) : !speechSupported ? (
+            {!speechSupported ? (
               <Keyboard className="w-8 h-8" />
             ) : (
               <svg
@@ -145,6 +143,7 @@ export const VoiceOrb = ({
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className={cn(isListening && "animate-pulse")}
               >
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
@@ -163,7 +162,7 @@ export const VoiceOrb = ({
             : isSpeaking
             ? "Tap to stop"
             : isListening
-            ? "Listening... tap to stop"
+            ? "Listening..."
             : !speechSupported
             ? "Use text input below"
             : "Tap to speak"}
