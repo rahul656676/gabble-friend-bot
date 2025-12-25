@@ -21,18 +21,14 @@ const personalities = [
 ];
 
 const languages = [
-  { value: 'en-US', label: 'English (US)' },
-  { value: 'en-GB', label: 'English (UK)' },
-  { value: 'es-ES', label: 'Spanish' },
-  { value: 'fr-FR', label: 'French' },
-  { value: 'de-DE', label: 'German' },
-  { value: 'it-IT', label: 'Italian' },
-  { value: 'pt-BR', label: 'Portuguese (Brazil)' },
-  { value: 'zh-CN', label: 'Chinese (Mandarin)' },
-  { value: 'ja-JP', label: 'Japanese' },
-  { value: 'ko-KR', label: 'Korean' },
-  { value: 'hi-IN', label: 'Hindi' },
-  { value: 'ar-SA', label: 'Arabic' },
+  { value: 'en-US', label: '🇺🇸 English (US)' },
+  { value: 'hi-IN', label: '🇮🇳 हिंदी (Hindi)' },
+  { value: 'hi-EN', label: '🇮🇳 Hinglish' },
+  { value: 'en-GB', label: '🇬🇧 English (UK)' },
+  { value: 'es-ES', label: '🇪🇸 Spanish' },
+  { value: 'fr-FR', label: '🇫🇷 French' },
+  { value: 'de-DE', label: '🇩🇪 German' },
+  { value: 'pt-BR', label: '🇧🇷 Portuguese' },
 ];
 
 export const SettingsPanel = ({

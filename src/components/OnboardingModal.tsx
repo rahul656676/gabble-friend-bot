@@ -21,17 +21,13 @@ const personalities = [
 
 const languages = [
   { value: 'en-US', label: 'English (US)', flag: '🇺🇸' },
+  { value: 'hi-IN', label: 'हिंदी (Hindi)', flag: '🇮🇳' },
+  { value: 'hi-EN', label: 'Hinglish', flag: '🇮🇳', description: 'Hindi + English mix' },
   { value: 'en-GB', label: 'English (UK)', flag: '🇬🇧' },
   { value: 'es-ES', label: 'Spanish', flag: '🇪🇸' },
   { value: 'fr-FR', label: 'French', flag: '🇫🇷' },
   { value: 'de-DE', label: 'German', flag: '🇩🇪' },
-  { value: 'it-IT', label: 'Italian', flag: '🇮🇹' },
   { value: 'pt-BR', label: 'Portuguese', flag: '🇧🇷' },
-  { value: 'zh-CN', label: 'Chinese', flag: '🇨🇳' },
-  { value: 'ja-JP', label: 'Japanese', flag: '🇯🇵' },
-  { value: 'ko-KR', label: 'Korean', flag: '🇰🇷' },
-  { value: 'hi-IN', label: 'Hindi', flag: '🇮🇳' },
-  { value: 'ar-SA', label: 'Arabic', flag: '🇸🇦' },
 ];
 
 export const OnboardingModal = ({ onComplete, availableVoices }: OnboardingModalProps) => {
@@ -73,7 +69,7 @@ export const OnboardingModal = ({ onComplete, availableVoices }: OnboardingModal
       title: 'Choose Your Language',
       subtitle: 'Select your preferred language for conversations',
       content: (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           {languages.map((lang) => (
             <button
               key={lang.value}
@@ -86,6 +82,9 @@ export const OnboardingModal = ({ onComplete, availableVoices }: OnboardingModal
             >
               <div className="text-2xl mb-2">{lang.flag}</div>
               <div className="text-sm font-medium">{lang.label}</div>
+              {'description' in lang && (
+                <div className="text-xs text-muted-foreground mt-1">{lang.description}</div>
+              )}
             </button>
           ))}
         </div>

@@ -14,6 +14,17 @@ const personalityPrompts: Record<string, string> = {
   concise: 'You are a concise expert. Give brief, direct answers. No fluff, just facts.',
 };
 
+const languageInstructions: Record<string, string> = {
+  'en-US': 'Respond in American English.',
+  'en-GB': 'Respond in British English.',
+  'hi-IN': 'हिंदी में जवाब दें। Use Devanagari script for Hindi responses.',
+  'hi-EN': 'Respond in Hinglish - a natural mix of Hindi and English as spoken in India. Use Roman script. Example: "Haan, main aapki help kar sakta hoon. Kya chahiye aapko?"',
+  'es-ES': 'Respond in Spanish.',
+  'fr-FR': 'Respond in French.',
+  'de-DE': 'Respond in German.',
+  'pt-BR': 'Respond in Brazilian Portuguese.',
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -54,7 +65,9 @@ serve(async (req) => {
     console.log('Cleaned messages count:', cleanedMessages.length);
 
     const personalityPrompt = personalityPrompts[personality] || personalityPrompts.helpful;
-    const languageName = language.split('-')[0] === 'en' ? 'English' : language;
+    const languageInstruction = languageInstructions[language] || 'Respond in English.';
+
+    console.log('Using language:', language, 'instruction:', languageInstruction);
 
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
@@ -67,7 +80,7 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: `${personalityPrompt} You have access to real-time web search. Keep responses concise and conversational (1-3 sentences unless more detail is needed). Always respond in ${languageName}.` 
+            content: `${personalityPrompt} You have access to real-time web search. Keep responses concise and conversational (1-3 sentences unless more detail is needed). ${languageInstruction}` 
           },
           ...cleanedMessages,
         ],
