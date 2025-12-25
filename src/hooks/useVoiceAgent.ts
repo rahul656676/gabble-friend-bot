@@ -56,52 +56,70 @@ export const useVoiceAgent = () => {
   
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const currentTranscriptRef = useRef<string>('');
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  const playAudio = useCallback(async (text: string) => {
-    try {
-      setIsSpeaking(true);
-      
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/text-to-speech`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ text }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to generate speech');
+  // Use browser's built-in speech synthesis (FREE!)
+  const speak = useCallback((text: string) => {
+    return new Promise<void>((resolve) => {
+      if (!('speechSynthesis' in window)) {
+        console.log('Speech synthesis not supported');
+        resolve();
+        return;
       }
 
-      const data = await response.json();
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utteranceRef.current = utterance;
       
-      if (data.error) {
-        throw new Error(data.error);
+      // Configure voice settings
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      utterance.lang = 'en-US';
+
+      // Try to get a good voice
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice = voices.find(
+        (voice) => 
+          voice.name.includes('Google') || 
+          voice.name.includes('Samantha') ||
+          voice.name.includes('Alex') ||
+          voice.name.includes('Microsoft')
+      ) || voices.find(v => v.lang.startsWith('en')) || voices[0];
+      
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
       }
 
-      const audioUrl = `data:audio/mpeg;base64,${data.audioContent}`;
-      const audio = new Audio(audioUrl);
-      
-      audio.onended = () => {
-        setIsSpeaking(false);
+      utterance.onstart = () => {
+        setIsSpeaking(true);
       };
-      
-      audio.onerror = () => {
+
+      utterance.onend = () => {
         setIsSpeaking(false);
-        console.error('Audio playback error');
+        resolve();
       };
-      
-      await audio.play();
-    } catch (error) {
-      console.error('Error playing audio:', error);
-      setIsSpeaking(false);
-      // Don't show toast for audio errors to avoid spam - text is still shown in chat
+
+      utterance.onerror = (event) => {
+        console.error('Speech synthesis error:', event);
+        setIsSpeaking(false);
+        resolve();
+      };
+
+      // Small delay to ensure voices are loaded
+      setTimeout(() => {
+        window.speechSynthesis.speak(utterance);
+      }, 100);
+    });
+  }, []);
+
+  const stopSpeaking = useCallback(() => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
     }
+    setIsSpeaking(false);
   }, []);
 
   const getAIResponse = useCallback(async (userMessage: string) => {
@@ -131,9 +149,10 @@ export const useVoiceAgent = () => {
       };
       
       setMessages(prev => [...prev, assistantMessage]);
+      setIsProcessing(false);
       
-      // Try to play the response (will fail silently if TTS unavailable)
-      await playAudio(aiResponse);
+      // Speak the response using browser TTS
+      await speak(aiResponse);
       
     } catch (error) {
       console.error('Error getting AI response:', error);
@@ -142,10 +161,9 @@ export const useVoiceAgent = () => {
         description: 'Failed to get AI response. Please try again.',
         variant: 'destructive',
       });
-    } finally {
       setIsProcessing(false);
     }
-  }, [messages, playAudio, toast]);
+  }, [messages, speak, toast]);
 
   const sendTextMessage = useCallback(async (text: string) => {
     if (!text.trim() || isProcessing || isSpeaking) return;
@@ -257,7 +275,13 @@ export const useVoiceAgent = () => {
   }, []);
 
   const handleOrbClick = useCallback(async () => {
-    if (isSpeaking || isProcessing) return;
+    if (isProcessing) return;
+    
+    // If speaking, stop it
+    if (isSpeaking) {
+      stopSpeaking();
+      return;
+    }
 
     if (!hasStarted) {
       setHasStarted(true);
@@ -271,14 +295,14 @@ export const useVoiceAgent = () => {
       };
       setMessages([assistantMessage]);
       
-      // Try to play greeting
-      await playAudio(greeting);
+      // Speak greeting
+      await speak(greeting);
     } else if (isListening) {
       stopListening();
     } else if (speechSupported) {
       await startListening();
     }
-  }, [hasStarted, isListening, isSpeaking, isProcessing, speechSupported, startListening, stopListening, playAudio]);
+  }, [hasStarted, isListening, isSpeaking, isProcessing, speechSupported, startListening, stopListening, speak, stopSpeaking]);
 
   return {
     isListening,
