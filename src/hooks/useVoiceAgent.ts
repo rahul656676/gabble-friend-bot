@@ -277,11 +277,6 @@ export const useVoiceAgent = () => {
 
   const handleOrbClick = useCallback(async () => {
     if (isProcessing) return;
-    
-    if (isSpeaking) {
-      stopSpeaking();
-      return;
-    }
 
     if (!hasStarted) {
       setHasStarted(true);
@@ -301,7 +296,17 @@ export const useVoiceAgent = () => {
     } else if (speechSupported) {
       await startListening();
     }
-  }, [hasStarted, isListening, isSpeaking, isProcessing, speechSupported, startListening, stopListening, speak, stopSpeaking]);
+  }, [hasStarted, isListening, isProcessing, speechSupported, startListening, stopListening, speak]);
+
+  const handleStopSpeaking = useCallback(() => {
+    stopSpeaking();
+    // Start listening after a short delay
+    if (speechSupported) {
+      setTimeout(() => {
+        startListening();
+      }, 300);
+    }
+  }, [stopSpeaking, speechSupported, startListening]);
 
   return {
     isListening,
@@ -311,6 +316,7 @@ export const useVoiceAgent = () => {
     hasStarted,
     speechSupported,
     handleOrbClick,
+    handleStopSpeaking,
     sendTextMessage,
   };
 };

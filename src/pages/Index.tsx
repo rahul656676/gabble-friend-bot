@@ -14,6 +14,7 @@ const Index = () => {
     hasStarted,
     speechSupported,
     handleOrbClick,
+    handleStopSpeaking,
     sendTextMessage,
   } = useVoiceAgent();
 
@@ -92,6 +93,7 @@ const Index = () => {
               isSpeaking={isSpeaking}
               isProcessing={isProcessing}
               onClick={handleOrbClick}
+              onStopSpeaking={handleStopSpeaking}
               speechSupported={speechSupported}
             />
           </div>
