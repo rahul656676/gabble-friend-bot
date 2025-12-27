@@ -6,6 +6,7 @@ import { QuickReplies } from "@/components/QuickReplies";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { StarterPrompts } from "@/components/StarterPrompts";
+import { DailyCheckIn } from "@/components/DailyCheckIn";
 import { Mic, Brain, Zap, Shield, Globe, Sparkles, BarChart3, Heart, Lock, AlertCircle } from "lucide-react";
 import { useVoiceAgent } from "@/hooks/useVoiceAgent";
 import { Button } from "@/components/ui/button";
@@ -148,6 +149,14 @@ const Index = () => {
               speechSupported={speechSupported}
             />
           </div>
+
+          {/* Daily Check-in - show before first interaction */}
+          {!hasStarted && (
+            <DailyCheckIn 
+              onMoodSelect={(msg) => sendTextMessage(msg, true)} 
+              disabled={isProcessing}
+            />
+          )}
 
           {/* Starter prompts - show before first interaction */}
           {!hasStarted && (
