@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Space Grotesk', 'sans-serif'],
+        sans: ['Rajdhani', 'sans-serif'],
+        display: ['Orbitron', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
@@ -65,6 +66,12 @@ export default {
           primary: "hsl(var(--glow-primary))",
           secondary: "hsl(var(--glow-secondary))",
         },
+        jarvis: {
+          DEFAULT: "hsl(var(--jarvis))",
+          light: "hsl(var(--jarvis-light))",
+          dark: "hsl(var(--jarvis-dark))",
+          glow: "hsl(var(--jarvis-glow))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -104,6 +111,7 @@ export default {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
         'grid-pattern': 'linear-gradient(to right, hsl(var(--border) / 0.1) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border) / 0.1) 1px, transparent 1px)',
+        'holo-grid': 'linear-gradient(to right, hsl(var(--jarvis) / 0.05) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--jarvis) / 0.05) 1px, transparent 1px)',
       },
     },
   },
