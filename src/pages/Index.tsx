@@ -279,10 +279,9 @@ const Index = () => {
             <div className="text-center text-xs text-muted-foreground font-mono tracking-wider">
               <p className="flex items-center justify-center gap-2">
                 <span className="h-[1px] w-8 bg-jarvis/30" />
-                HACKATHON PROJECT • EDUCATIONAL USE
+                HACKX TEAM AGENT • POWERED BY ADVANCED AI
                 <span className="h-[1px] w-8 bg-jarvis/30" />
               </p>
-              <p className="mt-2 text-jarvis/50">© 2024 HACKX TEAM AGENT • POWERED BY ADVANCED AI</p>
             </div>
           </div>
         </footer>
