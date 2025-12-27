@@ -57,11 +57,61 @@ const languageInstructions: Record<string, string> = {
   'en-US': 'Respond in American English.',
   'en-GB': 'Respond in British English.',
   'hi-IN': 'हिंदी में जवाब दें। Use Devanagari script for Hindi responses.',
-  'hi-EN': 'Respond in Hinglish - a natural mix of Hindi and English as spoken in India. Use Roman script. Example: "Haan, main aapki help kar sakta hoon. Kya chahiye aapko?"',
+  'hi-EN': 'Respond in Hinglish - a natural mix of Hindi and English as spoken in India. Use Roman script.',
   'es-ES': 'Respond in Spanish.',
   'fr-FR': 'Respond in French.',
   'de-DE': 'Respond in German.',
   'pt-BR': 'Respond in Brazilian Portuguese.',
+  'ta-IN': 'Respond in Tamil.',
+  'te-IN': 'Respond in Telugu.',
+  'bn-IN': 'Respond in Bengali.',
+  'mr-IN': 'Respond in Marathi.',
+  'gu-IN': 'Respond in Gujarati.',
+  'kn-IN': 'Respond in Kannada.',
+  'ml-IN': 'Respond in Malayalam.',
+  'pa-IN': 'Respond in Punjabi.',
+  'ur-IN': 'Respond in Urdu.',
+};
+
+// Auto-detect language from text
+const detectLanguage = (text: string): string => {
+  // Hindi (Devanagari)
+  if (/[\u0900-\u097F]/.test(text)) return 'hi-IN';
+  // Tamil
+  if (/[\u0B80-\u0BFF]/.test(text)) return 'ta-IN';
+  // Telugu
+  if (/[\u0C00-\u0C7F]/.test(text)) return 'te-IN';
+  // Bengali
+  if (/[\u0980-\u09FF]/.test(text)) return 'bn-IN';
+  // Gujarati
+  if (/[\u0A80-\u0AFF]/.test(text)) return 'gu-IN';
+  // Kannada
+  if (/[\u0C80-\u0CFF]/.test(text)) return 'kn-IN';
+  // Malayalam
+  if (/[\u0D00-\u0D7F]/.test(text)) return 'ml-IN';
+  // Punjabi (Gurmukhi)
+  if (/[\u0A00-\u0A7F]/.test(text)) return 'pa-IN';
+  // Arabic/Urdu
+  if (/[\u0600-\u06FF]/.test(text)) return 'ur-IN';
+  // Marathi uses Devanagari, detected above
+  
+  // Romanized Hindi/Hinglish detection (common Hindi words in Roman script)
+  const hinglishPatterns = /\b(kya|kaise|kahan|kab|kaun|kyun|haan|nahi|acha|theek|mujhe|tumhe|aapka|mera|tera|humara|bahut|bohot|accha|bhai|yaar|bolo|batao|samajh|samjho|dekho|suno|jao|aao|karo|karna|raha|rahi|rahe|wala|wali|wale|hai|hain|tha|thi|the|hoga|hogi|honge|lekin|aur|ya|par|se|ko|ka|ki|ke|ne|ho|main|hum|tum|aap|wo|woh|ye|yeh|kuch|sab|ab|abhi)\b/i;
+  if (hinglishPatterns.test(text)) return 'hi-EN';
+  
+  // Spanish patterns
+  const spanishPatterns = /\b(hola|gracias|por favor|como|estas|bueno|bien|malo|que|donde|cuando|porque|pero|muy|si|no|yo|tu|el|ella|nosotros|ellos|tengo|tienes|tiene|quiero|puedo|necesito)\b/i;
+  if (spanishPatterns.test(text)) return 'es-ES';
+  
+  // French patterns
+  const frenchPatterns = /\b(bonjour|merci|s'il vous plait|comment|allez|bien|mal|oui|non|je|tu|il|elle|nous|vous|ils|elles|suis|es|est|sommes|etes|sont|avoir|etre|faire|aller|vouloir|pouvoir)\b/i;
+  if (frenchPatterns.test(text)) return 'fr-FR';
+  
+  // German patterns
+  const germanPatterns = /\b(hallo|danke|bitte|wie|geht|gut|schlecht|ja|nein|ich|du|er|sie|wir|ihr|bin|bist|ist|sind|seid|haben|sein|machen|gehen|wollen|konnen)\b/i;
+  if (germanPatterns.test(text)) return 'de-DE';
+  
+  return 'en-US'; // Default to English
 };
 
 serve(async (req) => {
@@ -110,10 +160,14 @@ serve(async (req) => {
     
     console.log('Detected emotion:', detectedEmotion);
 
-    const personalityPrompt = personalityPrompts[personality] || personalityPrompts.helpful;
-    const languageInstruction = languageInstructions[language] || 'Respond in English.';
+    // Auto-detect language from user's message
+    const autoDetectedLanguage = lastUserMessage ? detectLanguage(lastUserMessage.content) : 'en-US';
+    const effectiveLanguage = autoDetectedLanguage !== 'en-US' ? autoDetectedLanguage : language;
+    
+    console.log('Auto-detected language:', autoDetectedLanguage, 'Effective language:', effectiveLanguage);
 
-    console.log('Using language:', language, 'instruction:', languageInstruction);
+    const personalityPrompt = personalityPrompts[personality] || personalityPrompts.helpful;
+    const languageInstruction = languageInstructions[effectiveLanguage] || 'Respond in English.';
 
     // Build context summary from conversation
     const conversationContext = cleanedMessages.length > 2 
