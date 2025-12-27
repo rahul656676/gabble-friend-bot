@@ -3,24 +3,97 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>Lovable App</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>Gabble Friend Bot - Your AI Companion for Emotional Support</title>
+    <meta name="description" content="Gabble Friend Bot is an AI companion designed to support you with stress, loneliness, and motivation. Talk naturally and feel heard." />
+    <meta name="author" content="Gabble Friend Bot" />
+    <meta name="keywords" content="AI companion, emotional support, chatbot, mental health, AI friend, stress relief, motivation" />
 
-    <!-- TODO: Update og:title to match your application name -->
-    <meta property="og:title" content="Lovable App" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <meta property="og:title" content="Gabble Friend Bot - Your AI Companion" />
+    <meta property="og:description" content="An AI friend that listens, responds emotionally, and talks like a real human. Get support whenever you need it." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
+    <meta name="twitter:site" content="@GabbleFriendBot" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://gabblefriendbot.lovable.app" />
+    
+    <!-- Loading screen styles -->
+    <style>
+      .loading-screen {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      .loading-orb {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #a855f7 0%, #06b6d4 100%);
+        box-shadow: 0 0 60px rgba(168, 85, 247, 0.5), 0 0 100px rgba(6, 182, 212, 0.3);
+        animation: pulse 2s ease-in-out infinite, float 3s ease-in-out infinite;
+      }
+      .loading-text {
+        color: #e2e8f0;
+        margin-top: 24px;
+        font-size: 1.25rem;
+        font-weight: 500;
+      }
+      .loading-subtext {
+        color: #94a3b8;
+        margin-top: 8px;
+        font-size: 0.875rem;
+      }
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+      }
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+      .loading-screen.hidden {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease-out;
+      }
+    </style>
   </head>
 
   <body>
+    <!-- Loading fallback screen -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loading-orb"></div>
+      <p class="loading-text">Gabble Friend Bot</p>
+      <p class="loading-subtext">Loading your AI companion...</p>
+    </div>
+    
+    <noscript>
+      <div style="padding: 40px; text-align: center; font-family: system-ui, sans-serif; background: #0f0f23; color: #e2e8f0; min-height: 100vh;">
+        <h1 style="color: #a855f7;">Gabble Friend Bot</h1>
+        <p style="color: #94a3b8;">JavaScript is required to use this AI companion.</p>
+        <p style="color: #94a3b8;">Please enable JavaScript in your browser settings.</p>
+      </div>
+    </noscript>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Hide loading screen once React renders
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var loader = document.getElementById('loading-screen');
+          if (loader) loader.classList.add('hidden');
+        }, 500);
+      });
+    </script>
   </body>
 </html>

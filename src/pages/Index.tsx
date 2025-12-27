@@ -5,7 +5,8 @@ import { TextInput } from "@/components/TextInput";
 import { QuickReplies } from "@/components/QuickReplies";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { OnboardingModal } from "@/components/OnboardingModal";
-import { Mic, Brain, Zap, Shield, Globe, Sparkles, BarChart3 } from "lucide-react";
+import { StarterPrompts } from "@/components/StarterPrompts";
+import { Mic, Brain, Zap, Shield, Globe, Sparkles, BarChart3, Heart, Lock, AlertCircle } from "lucide-react";
 import { useVoiceAgent } from "@/hooks/useVoiceAgent";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -33,14 +34,19 @@ const Index = () => {
 
   const features = [
     {
+      icon: Heart,
+      title: "Emotional Support",
+      description: "A companion that truly listens and responds with empathy to how you're feeling.",
+    },
+    {
       icon: Mic,
       title: "Natural Voice",
       description: "Speak naturally and get instant responses with human-like voice synthesis.",
     },
     {
       icon: Brain,
-      title: "Advanced AI",
-      description: "Powered by state-of-the-art language models for intelligent conversations.",
+      title: "Remembers Context",
+      description: "Keeps track of your conversation to provide personalized, meaningful responses.",
     },
     {
       icon: Zap,
@@ -50,17 +56,12 @@ const Index = () => {
     {
       icon: Shield,
       title: "Private & Secure",
-      description: "Your conversations are encrypted and never stored or shared.",
+      description: "Your conversations are encrypted and never stored or shared with third parties.",
     },
     {
       icon: Globe,
       title: "Multilingual",
-      description: "Communicate in multiple languages with accurate translations.",
-    },
-    {
-      icon: Sparkles,
-      title: "Always Learning",
-      description: "Continuously improving to provide better assistance over time.",
+      description: "Communicate in multiple languages including Hindi and Hinglish.",
     },
   ];
 
@@ -115,24 +116,29 @@ const Index = () => {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6">
             <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span className="text-sm font-medium text-muted-foreground">
-              AI Voice Agent
+              AI Companion
             </span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
-            <span className="text-gradient">Talk</span> with{" "}
-            <span className="text-foreground">Intelligence</span>
+            <span className="text-gradient">Gabble</span>{" "}
+            <span className="text-foreground">Friend Bot</span>
           </h1>
           
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Experience the future of conversation. Our AI voice agent understands you,
-            responds naturally, and helps you accomplish more.
+          {/* Clear value proposition */}
+          <p className="text-xl md:text-2xl text-foreground/90 max-w-2xl mx-auto mb-4 font-medium">
+            Your AI companion for emotional support & meaningful conversations
+          </p>
+          
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8">
+            Feeling stressed, lonely, or just need someone to talk to? 
+            Gabble listens, understands, and responds like a real friend.
           </p>
         </header>
 
         {/* Voice orb section */}
         <section className="flex flex-col items-center justify-center mb-12">
-          <div className="mb-20">
+          <div className="mb-12">
             <VoiceOrb
               isListening={isListening}
               isSpeaking={isSpeaking}
@@ -142,6 +148,16 @@ const Index = () => {
               speechSupported={speechSupported}
             />
           </div>
+
+          {/* Starter prompts - show before first interaction */}
+          {!hasStarted && (
+            <div className="w-full mb-8">
+              <StarterPrompts 
+                onSelect={(msg) => sendTextMessage(msg, true)} 
+                disabled={isProcessing}
+              />
+            </div>
+          )}
 
           <ConversationPanel 
             messages={messages} 
@@ -176,10 +192,10 @@ const Index = () => {
         <section className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Powerful <span className="text-gradient">Capabilities</span>
+              Why Talk to <span className="text-gradient">Gabble</span>?
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Built with cutting-edge technology to deliver an exceptional voice experience.
+              Built with empathy and cutting-edge AI to be your supportive companion.
             </p>
           </div>
 
@@ -196,11 +212,47 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="mt-24 text-center">
-          <p className="text-sm text-muted-foreground">
-            Powered by advanced AI technology
-          </p>
+        {/* Trust & Safety Footer */}
+        <footer className="mt-24 border-t border-border/50 pt-12">
+          <div className="max-w-4xl mx-auto">
+            {/* Disclaimer */}
+            <div className="glass rounded-2xl p-6 mb-8">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-full bg-amber-500/20">
+                  <AlertCircle className="w-5 h-5 text-amber-500" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Important Notice</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Gabble Friend Bot is an AI companion designed for casual conversation and emotional support. 
+                    It is <strong>not a substitute for professional mental health care</strong>. 
+                    If you're experiencing a crisis or need professional help, please reach out to a qualified therapist or counselor.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Trust indicators */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Lock className="w-4 h-4 text-primary" />
+                <span>Conversations are not stored permanently</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Shield className="w-4 h-4 text-primary" />
+                <span>Your privacy is protected</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Heart className="w-4 h-4 text-primary" />
+                <span>Built with care for your wellbeing</span>
+              </div>
+            </div>
+
+            <div className="text-center text-xs text-muted-foreground">
+              <p>Built for educational and demonstration purposes</p>
+              <p className="mt-1">© 2024 Gabble Friend Bot. Powered by advanced AI technology.</p>
+            </div>
+          </div>
         </footer>
       </div>
     </div>
