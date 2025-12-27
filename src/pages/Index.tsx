@@ -135,26 +135,26 @@ const Index = () => {
           </h1>
           
           {/* Clear value proposition */}
-          <p className="text-xl md:text-2xl text-jarvis/90 max-w-2xl mx-auto mb-4 font-medium tracking-wide animate-fade-in [animation-delay:0.2s] opacity-0 [animation-fill-mode:forwards]">
+          <p className="text-xl md:text-2xl text-jarvis/90 max-w-2xl mx-auto mb-4 font-medium tracking-wide animate-fade-in">
             Your AI-Powered Super Agent for Emotional Support
           </p>
           
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8 font-light animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8 font-light animate-fade-in">
             Advanced neural network with emotional intelligence. 
             Speak naturally. Get understood. Feel supported.
           </p>
 
           {/* Animated line decoration */}
-          <div className="flex justify-center items-center gap-4 animate-fade-in [animation-delay:0.6s] opacity-0 [animation-fill-mode:forwards]">
+          <div className="flex justify-center items-center gap-4 animate-fade-in">
             <div className="h-[1px] w-20 bg-gradient-to-r from-transparent via-jarvis to-transparent animate-pulse" />
-            <Sparkles className="w-5 h-5 text-jarvis animate-float" />
+            <Sparkles className="w-6 h-6 text-jarvis animate-float drop-shadow-[0_0_15px_hsl(var(--jarvis))]" />
             <div className="h-[1px] w-20 bg-gradient-to-r from-transparent via-jarvis to-transparent animate-pulse" />
           </div>
         </header>
 
         {/* Voice orb section */}
         <section className="flex flex-col items-center justify-center mb-12">
-          <div className="mb-16 animate-scale-in [animation-delay:0.3s] opacity-0 [animation-fill-mode:forwards]">
+          <div className="mb-16 animate-scale-in">
             <JarvisOrb
               isListening={isListening}
               isSpeaking={isSpeaking}
