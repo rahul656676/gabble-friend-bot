@@ -120,41 +120,41 @@ const Index = () => {
       {/* Main content */}
       <div className="relative z-10 container mx-auto px-4 py-12">
         {/* Hero section */}
-        <header className="text-center mb-16 animate-fade-in">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full glass border-jarvis/40 mb-8">
+        <header className="text-center mb-16">
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full glass border-jarvis/40 mb-8 animate-fade-in hover:scale-105 transition-transform duration-300 hover:shadow-jarvis-glow">
             <Cpu className="w-4 h-4 text-jarvis animate-pulse" />
             <span className="text-sm font-mono tracking-widest text-jarvis uppercase">
               Super Agent Online
             </span>
-            <div className="w-2 h-2 rounded-full bg-jarvis animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-jarvis animate-pulse shadow-[0_0_10px_hsl(var(--jarvis))]" />
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-wider">
-            <span className="text-gradient text-jarvis-glow">HACKX</span>{" "}
+          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-wider animate-slide-up">
+            <span className="text-gradient text-jarvis-glow animate-pulse">HACKX</span>{" "}
             <span className="text-foreground">TEAM AGENT</span>
           </h1>
           
           {/* Clear value proposition */}
-          <p className="text-xl md:text-2xl text-jarvis/90 max-w-2xl mx-auto mb-4 font-medium tracking-wide">
+          <p className="text-xl md:text-2xl text-jarvis/90 max-w-2xl mx-auto mb-4 font-medium tracking-wide animate-fade-in [animation-delay:0.2s] opacity-0 [animation-fill-mode:forwards]">
             Your AI-Powered Super Agent for Emotional Support
           </p>
           
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8 font-light">
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8 font-light animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
             Advanced neural network with emotional intelligence. 
             Speak naturally. Get understood. Feel supported.
           </p>
 
-          {/* Tech specs bar */}
-          <div className="flex flex-wrap justify-center gap-6 text-xs font-mono text-jarvis/70 uppercase tracking-wider">
-            <span>[ Neural Core v2.5 ]</span>
-            <span>[ Emotion Matrix Active ]</span>
-            <span>[ Memory Sync Enabled ]</span>
+          {/* Animated line decoration */}
+          <div className="flex justify-center items-center gap-4 animate-fade-in [animation-delay:0.6s] opacity-0 [animation-fill-mode:forwards]">
+            <div className="h-[1px] w-20 bg-gradient-to-r from-transparent via-jarvis to-transparent animate-pulse" />
+            <Sparkles className="w-5 h-5 text-jarvis animate-float" />
+            <div className="h-[1px] w-20 bg-gradient-to-r from-transparent via-jarvis to-transparent animate-pulse" />
           </div>
         </header>
 
         {/* Voice orb section */}
         <section className="flex flex-col items-center justify-center mb-12">
-          <div className="mb-16">
+          <div className="mb-16 animate-scale-in [animation-delay:0.3s] opacity-0 [animation-fill-mode:forwards]">
             <JarvisOrb
               isListening={isListening}
               isSpeaking={isSpeaking}
@@ -167,15 +167,17 @@ const Index = () => {
 
           {/* Daily Check-in - show before first interaction */}
           {!hasStarted && (
-            <DailyCheckIn 
-              onMoodSelect={(msg) => sendTextMessage(msg, true)} 
-              disabled={isProcessing}
-            />
+            <div className="animate-fade-in [animation-delay:0.5s] opacity-0 [animation-fill-mode:forwards]">
+              <DailyCheckIn 
+                onMoodSelect={(msg) => sendTextMessage(msg, true)} 
+                disabled={isProcessing}
+              />
+            </div>
           )}
 
           {/* Starter prompts - show before first interaction */}
           {!hasStarted && (
-            <div className="w-full mb-8">
+            <div className="w-full mb-8 animate-fade-in [animation-delay:0.7s] opacity-0 [animation-fill-mode:forwards]">
               <StarterPrompts 
                 onSelect={(msg) => sendTextMessage(msg, true)} 
                 disabled={isProcessing}
@@ -215,35 +217,36 @@ const Index = () => {
         {/* Features section */}
         <section className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4 tracking-wide">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4 tracking-wide animate-fade-in">
               <span className="text-gradient">SYSTEM</span>{" "}
               <span className="text-foreground">CAPABILITIES</span>
             </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto font-light">
+            <p className="text-muted-foreground max-w-xl mx-auto font-light animate-fade-in [animation-delay:0.2s] opacity-0 [animation-fill-mode:forwards]">
               Powered by advanced AI architecture for human-like interaction.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
-              <FeatureCard
-                key={feature.title}
-                icon={feature.icon}
-                title={feature.title}
-                description={feature.description}
-                delay={index * 100}
-              />
+              <div key={feature.title} className="animate-fade-in opacity-0 [animation-fill-mode:forwards]" style={{ animationDelay: `${0.1 + index * 0.1}s` }}>
+                <FeatureCard
+                  icon={feature.icon}
+                  title={feature.title}
+                  description={feature.description}
+                  delay={index * 100}
+                />
+              </div>
             ))}
           </div>
         </section>
 
         {/* Trust & Safety Footer */}
-        <footer className="mt-24 border-t border-jarvis/20 pt-12">
+        <footer className="mt-24 border-t border-jarvis/20 pt-12 animate-fade-in">
           <div className="max-w-4xl mx-auto">
             {/* Disclaimer */}
-            <div className="glass rounded-lg p-6 mb-8 border-jarvis/30">
+            <div className="glass rounded-lg p-6 mb-8 border-jarvis/30 hover:border-jarvis/50 transition-all duration-300 hover:shadow-jarvis-glow">
               <div className="flex items-start gap-4">
-                <div className="p-2 rounded-full bg-amber-500/20 border border-amber-500/30">
+                <div className="p-2 rounded-full bg-amber-500/20 border border-amber-500/30 animate-pulse">
                   <AlertCircle className="w-5 h-5 text-amber-500" />
                 </div>
                 <div>
@@ -259,23 +262,27 @@ const Index = () => {
 
             {/* Trust indicators */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Lock className="w-4 h-4 text-jarvis" />
+              <div className="flex items-center gap-3 text-sm text-muted-foreground group hover:text-jarvis transition-colors duration-300">
+                <Lock className="w-4 h-4 text-jarvis group-hover:animate-pulse" />
                 <span className="font-light">Zero permanent data storage</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Shield className="w-4 h-4 text-jarvis" />
+              <div className="flex items-center gap-3 text-sm text-muted-foreground group hover:text-jarvis transition-colors duration-300">
+                <Shield className="w-4 h-4 text-jarvis group-hover:animate-pulse" />
                 <span className="font-light">End-to-end encrypted</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Heart className="w-4 h-4 text-jarvis" />
+              <div className="flex items-center gap-3 text-sm text-muted-foreground group hover:text-jarvis transition-colors duration-300">
+                <Heart className="w-4 h-4 text-jarvis group-hover:animate-pulse" />
                 <span className="font-light">Built for your wellbeing</span>
               </div>
             </div>
 
             <div className="text-center text-xs text-muted-foreground font-mono tracking-wider">
-              <p>[ HACKATHON PROJECT // EDUCATIONAL USE ]</p>
-              <p className="mt-2 text-jarvis/50">© 2024 HACKX TEAM AGENT // POWERED BY ADVANCED AI</p>
+              <p className="flex items-center justify-center gap-2">
+                <span className="h-[1px] w-8 bg-jarvis/30" />
+                HACKATHON PROJECT • EDUCATIONAL USE
+                <span className="h-[1px] w-8 bg-jarvis/30" />
+              </p>
+              <p className="mt-2 text-jarvis/50">© 2024 HACKX TEAM AGENT • POWERED BY ADVANCED AI</p>
             </div>
           </div>
         </footer>

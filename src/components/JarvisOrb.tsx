@@ -191,26 +191,26 @@ export const JarvisOrb = ({
 
       {/* Status text with JARVIS styling */}
       <div className="absolute -bottom-16 text-center">
-        <p className="text-sm text-jarvis font-mono tracking-wider uppercase transition-all duration-300">
+        <p className="text-sm text-jarvis font-mono tracking-wider uppercase transition-all duration-300 drop-shadow-[0_0_10px_hsl(var(--jarvis)/0.5)]">
           {isProcessing
             ? "Processing..."
             : isSpeaking
-            ? "[ Tap to Stop ]"
+            ? "Tap to Stop"
             : isListening
-            ? "[ Listening ]"
+            ? "Listening..."
             : !speechSupported
             ? "Text Input Mode"
-            : "[ Tap to Speak ]"}
+            : "Tap to Speak"}
         </p>
-        <div className="mt-2 flex justify-center gap-1">
-          {[...Array(5)].map((_, i) => (
+        <div className="mt-3 flex justify-center gap-2">
+          {[...Array(7)].map((_, i) => (
             <div 
               key={i}
               className={cn(
-                "w-1 h-1 rounded-full bg-jarvis",
-                isActive && "animate-pulse",
-                `[animation-delay:${i * 0.1}s]`
+                "w-1.5 h-1.5 rounded-full bg-jarvis transition-all duration-300",
+                isActive ? "animate-pulse shadow-[0_0_8px_hsl(var(--jarvis))]" : "opacity-50"
               )}
+              style={{ animationDelay: `${i * 0.1}s` }}
             />
           ))}
         </div>
