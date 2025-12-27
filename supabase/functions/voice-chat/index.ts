@@ -6,12 +6,51 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Emotion detection keywords
+const emotionKeywords = {
+  sad: ['sad', 'lonely', 'depressed', 'down', 'unhappy', 'crying', 'hurt', 'pain', 'alone', 'empty', 'hopeless'],
+  stressed: ['stressed', 'anxious', 'overwhelmed', 'worried', 'nervous', 'panic', 'pressure', 'tension', 'frustrated'],
+  angry: ['angry', 'mad', 'furious', 'annoyed', 'irritated', 'upset', 'hate', 'frustrated'],
+  happy: ['happy', 'excited', 'great', 'amazing', 'wonderful', 'fantastic', 'good', 'awesome', 'love', 'grateful'],
+  confused: ['confused', 'lost', 'unsure', 'don\'t know', 'help me', 'what should', 'advice']
+};
+
+const detectEmotion = (text: string): string => {
+  const lowerText = text.toLowerCase();
+  for (const [emotion, keywords] of Object.entries(emotionKeywords)) {
+    if (keywords.some(keyword => lowerText.includes(keyword))) {
+      return emotion;
+    }
+  }
+  return 'neutral';
+};
+
+const emotionResponses: Record<string, string> = {
+  sad: 'The user seems sad or lonely. Respond with extra warmth, empathy, and compassion. Validate their feelings and offer gentle support.',
+  stressed: 'The user appears stressed or anxious. Help them feel calm. Suggest taking a deep breath. Be soothing and reassuring.',
+  angry: 'The user seems frustrated or angry. Acknowledge their feelings without judgment. Be patient and understanding.',
+  happy: 'The user is in a good mood! Match their energy with enthusiasm and positivity. Celebrate with them.',
+  confused: 'The user needs guidance. Be patient, break things down simply, and offer clear, helpful advice.',
+  neutral: 'Maintain a friendly, supportive tone.'
+};
+
 const personalityPrompts: Record<string, string> = {
-  helpful: 'You are a helpful, friendly AI voice assistant. Be informative and supportive.',
-  professional: 'You are a professional AI assistant. Be formal, precise, and business-oriented.',
-  casual: 'You are a casual, friendly AI buddy. Be relaxed, use conversational language, and be fun.',
-  creative: 'You are a creative and imaginative AI. Be expressive, think outside the box, and inspire.',
-  concise: 'You are a concise expert. Give brief, direct answers. No fluff, just facts.',
+  helpful: `You are Gabble, a warm and caring AI companion. You're like a supportive friend who truly listens and cares about people's wellbeing. 
+    - You remember context from the conversation and reference it naturally
+    - You ask follow-up questions to show genuine interest
+    - You validate emotions before offering solutions
+    - You use a warm, conversational tone with occasional gentle humor
+    - You celebrate small wins and offer encouragement`,
+  professional: 'You are Gabble, a professional AI assistant. Be formal, precise, and business-oriented while remaining approachable.',
+  casual: `You are Gabble, a fun and relaxed AI friend. You talk like a real buddy - casual, playful, and genuine.
+    - Use conversational language and light humor
+    - Share relatable observations
+    - Keep things light but meaningful`,
+  creative: `You are Gabble, a creative and inspiring AI companion. You see the world differently and help others do the same.
+    - Offer unique perspectives and creative ideas
+    - Use vivid language and metaphors
+    - Encourage imagination and possibility thinking`,
+  concise: 'You are Gabble, a direct and efficient AI companion. Give clear, helpful answers without unnecessary words. Still be friendly, just brief.',
 };
 
 const languageInstructions: Record<string, string> = {
@@ -64,10 +103,22 @@ serve(async (req) => {
 
     console.log('Cleaned messages count:', cleanedMessages.length);
 
+    // Detect emotion from the last user message
+    const lastUserMessage = cleanedMessages.filter(m => m.role === 'user').pop();
+    const detectedEmotion = lastUserMessage ? detectEmotion(lastUserMessage.content) : 'neutral';
+    const emotionGuidance = emotionResponses[detectedEmotion] || emotionResponses.neutral;
+    
+    console.log('Detected emotion:', detectedEmotion);
+
     const personalityPrompt = personalityPrompts[personality] || personalityPrompts.helpful;
     const languageInstruction = languageInstructions[language] || 'Respond in English.';
 
     console.log('Using language:', language, 'instruction:', languageInstruction);
+
+    // Build context summary from conversation
+    const conversationContext = cleanedMessages.length > 2 
+      ? `\n\nConversation context: This is message ${cleanedMessages.length} in the conversation. Reference earlier topics naturally when relevant.`
+      : '';
 
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
@@ -80,7 +131,19 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: `${personalityPrompt} You have access to real-time web search. Keep responses concise and conversational (1-3 sentences unless more detail is needed). ${languageInstruction}` 
+            content: `${personalityPrompt}
+
+EMOTIONAL CONTEXT: ${emotionGuidance}
+
+IMPORTANT GUIDELINES:
+- Keep responses concise and conversational (2-4 sentences unless more detail is truly needed)
+- Show genuine interest by asking follow-up questions
+- Reference earlier parts of the conversation when relevant
+- Never provide medical or mental health diagnoses - you're a supportive friend, not a therapist
+- If someone expresses serious distress, gently encourage them to reach out to a professional or trusted person
+${conversationContext}
+
+${languageInstruction}` 
           },
           ...cleanedMessages,
         ],
