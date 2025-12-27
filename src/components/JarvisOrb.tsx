@@ -79,14 +79,27 @@ export const JarvisOrb = ({
         </svg>
       </div>
 
-      {/* Arc reactor glow effect */}
-      {isActive && (
-        <>
-          <div className="absolute w-64 h-64 rounded-full bg-jarvis/5 animate-pulse" />
-          <div className="absolute w-56 h-56 rounded-full bg-jarvis/10 animate-pulse [animation-delay:0.2s]" />
-          <div className="absolute w-48 h-48 rounded-full bg-jarvis/15 animate-pulse [animation-delay:0.4s]" />
-        </>
-      )}
+      {/* Enhanced Arc reactor glow effect */}
+      <div className={cn(
+        "absolute w-72 h-72 rounded-full transition-all duration-500",
+        "bg-gradient-radial from-jarvis/20 via-jarvis/5 to-transparent",
+        isActive ? "opacity-100 scale-110" : "opacity-50"
+      )} />
+      <div className={cn(
+        "absolute w-64 h-64 rounded-full transition-all duration-700",
+        "bg-gradient-radial from-jarvis/30 via-jarvis/10 to-transparent animate-pulse",
+        isActive && "shadow-[0_0_80px_20px_hsl(var(--jarvis)/0.4)]"
+      )} />
+      <div className={cn(
+        "absolute w-56 h-56 rounded-full animate-pulse [animation-delay:0.15s]",
+        "bg-gradient-radial from-jarvis/40 via-jarvis/15 to-transparent",
+        isActive && "shadow-[0_0_60px_15px_hsl(var(--jarvis)/0.5)]"
+      )} />
+      <div className={cn(
+        "absolute w-48 h-48 rounded-full animate-pulse [animation-delay:0.3s]",
+        "bg-gradient-radial from-jarvis/50 via-jarvis/20 to-transparent",
+        isActive && "shadow-[0_0_40px_10px_hsl(var(--jarvis)/0.6)]"
+      )} />
 
       {/* Main orb - Arc Reactor style */}
       <button
@@ -100,7 +113,7 @@ export const JarvisOrb = ({
           !isDisabled && "hover:scale-105 active:scale-95 cursor-pointer",
           isDisabled && "cursor-not-allowed opacity-90",
           "focus:outline-none focus:ring-2 focus:ring-jarvis/50 focus:ring-offset-4 focus:ring-offset-background",
-          isActive && "shadow-jarvis-glow"
+          isActive && "shadow-[0_0_100px_30px_hsl(var(--jarvis)/0.5),inset_0_0_30px_hsl(var(--jarvis)/0.3)]"
         )}
       >
         {/* Arc reactor triangular segments */}
@@ -110,21 +123,33 @@ export const JarvisOrb = ({
               <path
                 key={angle}
                 d={`M50,50 L${50 + 35 * Math.cos((angle * Math.PI) / 180)},${50 + 35 * Math.sin((angle * Math.PI) / 180)} A35,35 0 0,1 ${50 + 35 * Math.cos(((angle + 50) * Math.PI) / 180)},${50 + 35 * Math.sin(((angle + 50) * Math.PI) / 180)} Z`}
-                fill={isActive ? "hsl(var(--jarvis) / 0.3)" : "hsl(var(--jarvis) / 0.15)"}
+                fill={isActive ? "hsl(var(--jarvis) / 0.4)" : "hsl(var(--jarvis) / 0.2)"}
                 stroke="hsl(var(--jarvis))"
                 strokeWidth="0.5"
+                style={{ filter: isActive ? 'drop-shadow(0 0 8px hsl(var(--jarvis)))' : 'none' }}
               />
             ))}
           </svg>
         </div>
 
-        {/* Inner core circle */}
+        {/* Inner core circle - ENHANCED GLOW */}
         <div 
           className={cn(
-            "absolute w-20 h-20 rounded-full",
-            "bg-gradient-radial from-jarvis via-jarvis/60 to-transparent",
-            "border border-jarvis",
+            "absolute w-24 h-24 rounded-full",
+            "bg-gradient-radial from-jarvis via-jarvis/70 to-jarvis/30",
+            "border-2 border-jarvis",
+            "shadow-[0_0_50px_15px_hsl(var(--jarvis)/0.6),inset_0_0_20px_hsl(var(--jarvis)/0.5)]",
             isActive && "animate-pulse-glow-jarvis"
+          )}
+        />
+        
+        {/* Core center bright spot */}
+        <div 
+          className={cn(
+            "absolute w-12 h-12 rounded-full",
+            "bg-gradient-radial from-white via-jarvis-light to-jarvis",
+            "shadow-[0_0_30px_10px_hsl(var(--jarvis-light)/0.8)]",
+            isActive && "animate-pulse"
           )}
         />
 

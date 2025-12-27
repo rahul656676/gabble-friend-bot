@@ -3,84 +3,272 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gabble Friend Bot - Your AI Companion for Emotional Support</title>
-    <meta name="description" content="Gabble Friend Bot is an AI companion designed to support you with stress, loneliness, and motivation. Talk naturally and feel heard." />
-    <meta name="author" content="Gabble Friend Bot" />
-    <meta name="keywords" content="AI companion, emotional support, chatbot, mental health, AI friend, stress relief, motivation" />
+    <title>HackX Team Agent - Your AI Super Agent for Emotional Support</title>
+    <meta name="description" content="HackX Team Agent is an AI-powered super agent designed to support you with stress, loneliness, and motivation. Talk naturally and feel heard." />
+    <meta name="author" content="HackX Team" />
+    <meta name="keywords" content="AI agent, emotional support, chatbot, mental health, AI friend, stress relief, motivation, JARVIS" />
 
-    <meta property="og:title" content="Gabble Friend Bot - Your AI Companion" />
-    <meta property="og:description" content="An AI friend that listens, responds emotionally, and talks like a real human. Get support whenever you need it." />
+    <meta property="og:title" content="HackX Team Agent - Your AI Super Agent" />
+    <meta property="og:description" content="An AI super agent that listens, responds emotionally, and talks like a real human. Get support whenever you need it." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@GabbleFriendBot" />
+    <meta name="twitter:site" content="@HackXTeam" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://gabblefriendbot.lovable.app" />
     
-    <!-- Loading screen styles -->
+    <!-- Orbitron Font for JARVIS theme -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Loading screen styles - JARVIS Theme -->
     <style>
       .loading-screen {
         position: fixed;
         inset: 0;
-        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+        background: linear-gradient(135deg, #030712 0%, #0a1628 50%, #0f172a 100%);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 9999;
-        font-family: system-ui, -apple-system, sans-serif;
+        font-family: 'Orbitron', system-ui, sans-serif;
+        overflow: hidden;
       }
-      .loading-orb {
-        width: 80px;
-        height: 80px;
+      
+      /* Grid background */
+      .loading-screen::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: 
+          linear-gradient(rgba(34, 211, 238, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: grid-move 20s linear infinite;
+      }
+      
+      @keyframes grid-move {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(50px, 50px); }
+      }
+      
+      /* Corner decorations */
+      .loading-screen::after {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        border: 1px solid rgba(34, 211, 238, 0.2);
+        pointer-events: none;
+      }
+      
+      .loading-orb-container {
+        position: relative;
+        width: 160px;
+        height: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      /* Outer rotating ring */
+      .loading-ring-outer {
+        position: absolute;
+        width: 160px;
+        height: 160px;
+        border: 2px solid rgba(34, 211, 238, 0.3);
         border-radius: 50%;
-        background: linear-gradient(135deg, #a855f7 0%, #06b6d4 100%);
-        box-shadow: 0 0 60px rgba(168, 85, 247, 0.5), 0 0 100px rgba(6, 182, 212, 0.3);
-        animation: pulse 2s ease-in-out infinite, float 3s ease-in-out infinite;
+        animation: spin 8s linear infinite;
       }
+      
+      .loading-ring-outer::before {
+        content: '';
+        position: absolute;
+        top: -4px;
+        left: 50%;
+        width: 8px;
+        height: 8px;
+        background: #22d3ee;
+        border-radius: 50%;
+        box-shadow: 0 0 20px #22d3ee;
+      }
+      
+      /* Middle counter-rotating ring */
+      .loading-ring-middle {
+        position: absolute;
+        width: 130px;
+        height: 130px;
+        border: 1px dashed rgba(34, 211, 238, 0.4);
+        border-radius: 50%;
+        animation: spin-reverse 6s linear infinite;
+      }
+      
+      /* Inner ring */
+      .loading-ring-inner {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        border: 2px solid rgba(34, 211, 238, 0.5);
+        border-radius: 50%;
+        animation: spin 4s linear infinite;
+      }
+      
+      /* Core orb */
+      .loading-orb {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #22d3ee 0%, rgba(34, 211, 238, 0.6) 40%, transparent 70%);
+        box-shadow: 
+          0 0 60px rgba(34, 211, 238, 0.8),
+          0 0 100px rgba(34, 211, 238, 0.5),
+          0 0 140px rgba(34, 211, 238, 0.3),
+          inset 0 0 30px rgba(255, 255, 255, 0.3);
+        animation: pulse-glow 2s ease-in-out infinite;
+      }
+      
+      .loading-orb::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        background: radial-gradient(circle, #fff 0%, #22d3ee 100%);
+        border-radius: 50%;
+        box-shadow: 0 0 20px #fff;
+      }
+      
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      
+      @keyframes spin-reverse {
+        from { transform: rotate(360deg); }
+        to { transform: rotate(0deg); }
+      }
+      
+      @keyframes pulse-glow {
+        0%, 100% { 
+          transform: scale(1);
+          box-shadow: 
+            0 0 60px rgba(34, 211, 238, 0.8),
+            0 0 100px rgba(34, 211, 238, 0.5),
+            0 0 140px rgba(34, 211, 238, 0.3);
+        }
+        50% { 
+          transform: scale(1.1);
+          box-shadow: 
+            0 0 80px rgba(34, 211, 238, 1),
+            0 0 120px rgba(34, 211, 238, 0.7),
+            0 0 180px rgba(34, 211, 238, 0.4);
+        }
+      }
+      
       .loading-text {
-        color: #e2e8f0;
-        margin-top: 24px;
-        font-size: 1.25rem;
-        font-weight: 500;
+        color: #22d3ee;
+        margin-top: 40px;
+        font-size: 1.5rem;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        text-shadow: 0 0 30px rgba(34, 211, 238, 0.8);
+        animation: text-glow 2s ease-in-out infinite;
       }
+      
       .loading-subtext {
-        color: #94a3b8;
-        margin-top: 8px;
-        font-size: 0.875rem;
+        color: rgba(34, 211, 238, 0.7);
+        margin-top: 12px;
+        font-size: 0.75rem;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        animation: fade-pulse 1.5s ease-in-out infinite;
       }
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.1); opacity: 0.8; }
+      
+      .loading-dots {
+        display: flex;
+        gap: 8px;
+        margin-top: 24px;
       }
-      @keyframes float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
+      
+      .loading-dot {
+        width: 6px;
+        height: 6px;
+        background: #22d3ee;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #22d3ee;
+        animation: dot-pulse 1.4s ease-in-out infinite;
       }
+      
+      .loading-dot:nth-child(1) { animation-delay: 0s; }
+      .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+      .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+      .loading-dot:nth-child(4) { animation-delay: 0.6s; }
+      .loading-dot:nth-child(5) { animation-delay: 0.8s; }
+      
+      @keyframes dot-pulse {
+        0%, 80%, 100% { 
+          transform: scale(1);
+          opacity: 0.5;
+        }
+        40% { 
+          transform: scale(1.5);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes text-glow {
+        0%, 100% { text-shadow: 0 0 30px rgba(34, 211, 238, 0.8); }
+        50% { text-shadow: 0 0 50px rgba(34, 211, 238, 1), 0 0 80px rgba(34, 211, 238, 0.5); }
+      }
+      
+      @keyframes fade-pulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+      }
+      
       .loading-screen.hidden {
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.5s ease-out;
+        transition: opacity 0.8s ease-out;
       }
     </style>
   </head>
 
   <body>
-    <!-- Loading fallback screen -->
+    <!-- Loading fallback screen - JARVIS Theme -->
     <div id="loading-screen" class="loading-screen">
-      <div class="loading-orb"></div>
-      <p class="loading-text">Gabble Friend Bot</p>
-      <p class="loading-subtext">Loading your AI companion...</p>
+      <div class="loading-orb-container">
+        <div class="loading-ring-outer"></div>
+        <div class="loading-ring-middle"></div>
+        <div class="loading-ring-inner"></div>
+        <div class="loading-orb"></div>
+      </div>
+      <p class="loading-text">HackX Agent</p>
+      <p class="loading-subtext">Initializing Neural Systems</p>
+      <div class="loading-dots">
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+      </div>
     </div>
     
     <noscript>
-      <div style="padding: 40px; text-align: center; font-family: system-ui, sans-serif; background: #0f0f23; color: #e2e8f0; min-height: 100vh;">
-        <h1 style="color: #a855f7;">Gabble Friend Bot</h1>
-        <p style="color: #94a3b8;">JavaScript is required to use this AI companion.</p>
-        <p style="color: #94a3b8;">Please enable JavaScript in your browser settings.</p>
+      <div style="padding: 40px; text-align: center; font-family: 'Orbitron', system-ui, sans-serif; background: #030712; color: #22d3ee; min-height: 100vh;">
+        <h1 style="color: #22d3ee; text-shadow: 0 0 30px rgba(34, 211, 238, 0.8);">HackX Team Agent</h1>
+        <p style="color: rgba(34, 211, 238, 0.7);">JavaScript is required to initialize the AI systems.</p>
+        <p style="color: rgba(34, 211, 238, 0.7);">Please enable JavaScript in your browser settings.</p>
       </div>
     </noscript>
     
@@ -92,7 +280,7 @@
         setTimeout(function() {
           var loader = document.getElementById('loading-screen');
           if (loader) loader.classList.add('hidden');
-        }, 500);
+        }, 800);
       });
     </script>
   </body>
