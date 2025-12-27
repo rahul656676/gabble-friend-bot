@@ -25,6 +25,55 @@ const detectEmotion = (text: string): string => {
   return 'neutral';
 };
 
+// Extract user's name from conversation
+const extractUserName = (messages: { role: string; content: string }[]): string | null => {
+  const namePatterns = [
+    /my name is (\w+)/i,
+    /i'm (\w+)/i,
+    /i am (\w+)/i,
+    /call me (\w+)/i,
+    /this is (\w+)/i,
+    /मेरा नाम (\w+)/i,
+    /mera naam (\w+)/i,
+  ];
+  
+  for (const msg of messages) {
+    if (msg.role === 'user') {
+      for (const pattern of namePatterns) {
+        const match = msg.content.match(pattern);
+        if (match && match[1] && match[1].length > 1 && match[1].length < 20) {
+          return match[1];
+        }
+      }
+    }
+  }
+  return null;
+};
+
+// Detect overall mood trend from conversation
+const detectMoodTrend = (messages: { role: string; content: string }[]): string => {
+  const emotions = messages
+    .filter(m => m.role === 'user')
+    .map(m => detectEmotion(m.content));
+  
+  const emotionCounts: Record<string, number> = {};
+  for (const emotion of emotions) {
+    emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
+  }
+  
+  const sorted = Object.entries(emotionCounts).sort((a, b) => b[1] - a[1]);
+  return sorted[0]?.[0] || 'neutral';
+};
+
+// Get time-based greeting
+const getTimeBasedContext = (): string => {
+  const hour = new Date().getUTCHours();
+  if (hour >= 5 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 17) return 'afternoon';
+  if (hour >= 17 && hour < 21) return 'evening';
+  return 'night';
+};
+
 const emotionResponses: Record<string, string> = {
   sad: 'The user seems sad or lonely. Respond with extra warmth, empathy, and compassion. Validate their feelings and offer gentle support.',
   stressed: 'The user appears stressed or anxious. Help them feel calm. Suggest taking a deep breath. Be soothing and reassuring.',
@@ -169,6 +218,21 @@ serve(async (req) => {
     const personalityPrompt = personalityPrompts[personality] || personalityPrompts.helpful;
     const languageInstruction = languageInstructions[effectiveLanguage] || 'Respond in English.';
 
+    // Extract user memory from conversation
+    const userName = extractUserName(cleanedMessages);
+    const moodTrend = detectMoodTrend(cleanedMessages);
+    const timeOfDay = getTimeBasedContext();
+    
+    // Build memory context
+    let memoryContext = '';
+    if (userName) {
+      memoryContext += `\nUSER NAME: The user's name is ${userName}. Use their name occasionally (not every message) to make the conversation personal.`;
+    }
+    if (moodTrend !== 'neutral' && cleanedMessages.length > 2) {
+      memoryContext += `\nMOOD TREND: Throughout this conversation, the user has mostly been feeling ${moodTrend}. Keep this in mind.`;
+    }
+    memoryContext += `\nTIME CONTEXT: It's ${timeOfDay} for the user. You can reference this naturally if appropriate.`;
+
     // Build context summary from conversation
     const conversationContext = cleanedMessages.length > 2 
       ? `\n\nConversation context: This is message ${cleanedMessages.length} in the conversation. Reference earlier topics naturally when relevant.`
@@ -186,6 +250,7 @@ serve(async (req) => {
           { 
             role: 'system', 
             content: `${personalityPrompt}
+${memoryContext}
 
 EMOTIONAL CONTEXT: ${emotionGuidance}
 
