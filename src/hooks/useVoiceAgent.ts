@@ -317,6 +317,21 @@ export const useVoiceAgent = () => {
 
   const startListening = useCallback(async () => {
     try {
+      // First, request microphone permission
+      try {
+        console.log('Requesting microphone permission...');
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        console.log('Microphone permission granted');
+      } catch (micError) {
+        console.error('Microphone permission denied:', micError);
+        toast({
+          title: 'Microphone Access Required',
+          description: 'Please allow microphone access to use voice features.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const windowWithSpeech = window as typeof window & {
         SpeechRecognition?: SpeechRecognitionConstructor;
         webkitSpeechRecognition?: SpeechRecognitionConstructor;
@@ -325,15 +340,17 @@ export const useVoiceAgent = () => {
       const SpeechRecognitionAPI = windowWithSpeech.SpeechRecognition || windowWithSpeech.webkitSpeechRecognition;
       
       if (!SpeechRecognitionAPI) {
+        console.log('SpeechRecognition API not available');
         setSpeechSupported(false);
         toast({
           title: 'Voice Not Supported',
-          description: 'Use the text input below to chat with the AI.',
+          description: 'Your browser doesn\'t support voice recognition. Use the text input below.',
           variant: 'default',
         });
         return;
       }
 
+      console.log('Starting speech recognition...');
       const recognition = new SpeechRecognitionAPI();
       recognition.continuous = false;
       recognition.interimResults = true;
@@ -356,6 +373,7 @@ export const useVoiceAgent = () => {
 
         if (finalTranscript) {
           currentTranscriptRef.current += finalTranscript;
+          console.log('Transcript:', currentTranscriptRef.current);
         }
       };
 
@@ -364,6 +382,29 @@ export const useVoiceAgent = () => {
         setIsListening(false);
         
         if (event.error === 'no-speech') {
+          toast({
+            title: 'No speech detected',
+            description: 'Please try speaking again.',
+            variant: 'default',
+          });
+          return;
+        }
+
+        if (event.error === 'not-allowed') {
+          toast({
+            title: 'Microphone Access Denied',
+            description: 'Please enable microphone access in your browser settings.',
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (event.error === 'network') {
+          toast({
+            title: 'Network Error',
+            description: 'Speech recognition requires an internet connection.',
+            variant: 'destructive',
+          });
           return;
         }
         
@@ -376,6 +417,7 @@ export const useVoiceAgent = () => {
       };
 
       recognition.onend = () => {
+        console.log('Speech recognition ended');
         setIsListening(false);
         if (currentTranscriptRef.current.trim()) {
           const userMessage: Message = {
@@ -393,6 +435,7 @@ export const useVoiceAgent = () => {
       recognition.start();
       recognitionRef.current = recognition;
       setIsListening(true);
+      console.log('Speech recognition started, listening...');
 
     } catch (error) {
       console.error('Error starting speech recognition:', error);
