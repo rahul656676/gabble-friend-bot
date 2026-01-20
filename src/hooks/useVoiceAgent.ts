@@ -99,136 +99,123 @@ export const useVoiceAgent = () => {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const speak = useCallback(async (text: string): Promise<void> => {
-    try {
+  // Browser speech synthesis - reliable and works everywhere
+  const speak = useCallback((text: string): Promise<void> => {
+    return new Promise<void>((resolve) => {
+      if (!('speechSynthesis' in window)) {
+        console.log('Speech synthesis not supported');
+        resolve();
+        return;
+      }
+
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+
       // Clean the text before speaking
       const cleanedText = cleanTextForSpeech(text);
       
       if (!cleanedText.trim()) {
         console.log('No text to speak');
+        resolve();
         return;
       }
 
-      console.log('Calling ElevenLabs TTS for:', cleanedText.substring(0, 50) + '...');
-      setIsSpeaking(true);
+      console.log('Speaking:', cleanedText.substring(0, 50) + '...');
+      
+      const utterance = new SpeechSynthesisUtterance(cleanedText);
+      
+      // Apply user preferences
+      utterance.rate = preferences.voiceRate;
+      utterance.pitch = preferences.voicePitch;
+      utterance.volume = 1.0;
+      
+      // Map Hinglish to Hindi for speech synthesis
+      const speechLang = preferences.language === 'hi-EN' ? 'hi-IN' : preferences.language;
+      utterance.lang = speechLang;
 
-      // Call ElevenLabs text-to-speech edge function
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/text-to-speech`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ 
-            text: cleanedText,
-            // Sarah voice - natural, friendly female voice
-            voiceId: 'EXAVITQu4vr4xnSDxMaL'
-          }),
+      // Get voices and select the best one
+      const getVoicesAndSpeak = () => {
+        const voices = window.speechSynthesis.getVoices();
+        console.log('Available voices:', voices.length);
+        
+        let selectedVoice: SpeechSynthesisVoice | undefined;
+
+        if (preferences.voiceName !== 'default') {
+          selectedVoice = voices.find(v => v.name === preferences.voiceName);
         }
-      );
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('TTS error:', errorData);
-        throw new Error(errorData.error || 'TTS request failed');
-      }
+        if (!selectedVoice) {
+          // Find a voice matching the language
+          selectedVoice = voices.find(v => v.lang.startsWith(preferences.language.split('-')[0])) ||
+            voices.find(v => v.lang.startsWith('en')) ||
+            voices[0];
+        }
+        
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+          console.log('Using voice:', selectedVoice.name);
+        }
 
-      const data = await response.json();
-      
-      if (!data.audioContent) {
-        throw new Error('No audio content received');
-      }
+        utterance.onstart = () => {
+          console.log('Speech started');
+          setIsSpeaking(true);
+        };
 
-      // Use data URI - browser natively decodes base64 audio
-      const audioUrl = `data:audio/mpeg;base64,${data.audioContent}`;
-      
-      // Stop any existing audio
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
+        utterance.onend = () => {
+          console.log('Speech ended');
+          setIsSpeaking(false);
+          resolve();
+        };
 
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-      
-      audio.onended = () => {
-        setIsSpeaking(false);
-        audioRef.current = null;
+        utterance.onerror = (e) => {
+          console.error('Speech error:', e);
+          setIsSpeaking(false);
+          resolve();
+        };
+
+        // Small delay to ensure voice is ready
+        setTimeout(() => {
+          window.speechSynthesis.speak(utterance);
+        }, 50);
       };
 
-      audio.onerror = (e) => {
-        console.error('Audio playback error:', e);
-        setIsSpeaking(false);
-        audioRef.current = null;
-      };
+      // Voices might not be loaded immediately
+      if (window.speechSynthesis.getVoices().length === 0) {
+        window.speechSynthesis.onvoiceschanged = getVoicesAndSpeak;
+      } else {
+        getVoicesAndSpeak();
+      }
+    });
+  }, [preferences.voiceRate, preferences.voicePitch, preferences.voiceName, preferences.language]);
 
-      await audio.play();
-      console.log('Audio playing...');
+  // Keep speech synthesis alive for long texts (Chrome bug workaround)
+  useEffect(() => {
+    if (!isSpeaking) return;
+    
+    const interval = setInterval(() => {
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.pause();
+        window.speechSynthesis.resume();
+      }
+    }, 10000); // Every 10 seconds
+    
+    return () => clearInterval(interval);
+  }, [isSpeaking]);
 
-    } catch (error) {
-      console.error('TTS error:', error);
-      setIsSpeaking(false);
-      
-      // Fallback to browser speech synthesis
-      console.log('Falling back to browser speech synthesis');
-      fallbackSpeak(text);
+  // Preload voices on mount
+  useEffect(() => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.getVoices();
     }
   }, []);
 
-  // Fallback browser speech synthesis
-  const fallbackSpeak = useCallback((text: string) => {
-    if (!('speechSynthesis' in window)) {
-      console.log('Speech synthesis not supported');
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-    const cleanedText = cleanTextForSpeech(text);
-    const utterance = new SpeechSynthesisUtterance(cleanedText);
-    
-    utterance.rate = preferences.voiceRate;
-    utterance.pitch = preferences.voicePitch;
-    utterance.volume = 1.0;
-    
-    const speechLang = preferences.language === 'hi-EN' ? 'hi-IN' : preferences.language;
-    utterance.lang = speechLang;
-
-    const voices = window.speechSynthesis.getVoices();
-    let selectedVoice: SpeechSynthesisVoice | undefined;
-
-    if (preferences.voiceName !== 'default') {
-      selectedVoice = voices.find(v => v.name === preferences.voiceName);
-    }
-
-    if (!selectedVoice) {
-      selectedVoice = voices.find(v => v.lang.startsWith(preferences.language.split('-')[0])) ||
-        voices.find(v => v.lang.startsWith('en')) ||
-        voices[0];
-    }
-    
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
-
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    setTimeout(() => {
-      window.speechSynthesis.speak(utterance);
-    }, 100);
-  }, [preferences.voiceRate, preferences.voicePitch, preferences.voiceName, preferences.language]);
-
   const stopSpeaking = useCallback(() => {
-    // Stop ElevenLabs audio
+    // Stop ElevenLabs audio if any
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
     }
-    // Also stop browser speech synthesis (fallback)
+    // Stop browser speech synthesis
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
