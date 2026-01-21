@@ -124,19 +124,19 @@ const Index = () => {
           <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full glass border-jarvis/40 mb-8 animate-fade-in hover:scale-105 transition-transform duration-300 hover:shadow-jarvis-glow">
             <Cpu className="w-4 h-4 text-jarvis animate-pulse" />
             <span className="text-sm font-mono tracking-widest text-jarvis uppercase">
-              Super Agent Online
+              Agent Online
             </span>
             <div className="w-2 h-2 rounded-full bg-jarvis animate-pulse shadow-[0_0_10px_hsl(var(--jarvis))]" />
           </div>
           
           <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-wider animate-slide-up">
-            <span className="text-gradient text-jarvis-glow animate-pulse">HACKX</span>{" "}
-            <span className="text-foreground">TEAM AGENT</span>
+            <span className="text-gradient text-jarvis-glow animate-pulse">RAHUL'S</span>{" "}
+            <span className="text-foreground">AGENT</span>
           </h1>
           
           {/* Clear value proposition */}
           <p className="text-xl md:text-2xl text-jarvis/90 max-w-2xl mx-auto mb-4 font-medium tracking-wide animate-fade-in">
-            Your AI-Powered Super Agent for Emotional Support
+            Your Personal AI Agent for Emotional Support
           </p>
           
           <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8 font-light animate-fade-in">
@@ -250,9 +250,9 @@ const Index = () => {
                   <AlertCircle className="w-5 h-5 text-amber-500" />
                 </div>
                 <div>
-                  <h3 className="font-display font-semibold text-foreground mb-2 tracking-wide">SYSTEM NOTICE</h3>
+                <h3 className="font-display font-semibold text-foreground mb-2 tracking-wide">SYSTEM NOTICE</h3>
                   <p className="text-sm text-muted-foreground font-light">
-                    HackX Team Agent is an AI companion designed for casual conversation and emotional support. 
+                    Rahul's Agent is an AI companion designed for casual conversation and emotional support.
                     It is <strong className="text-foreground">not a substitute for professional mental health care</strong>. 
                     If you're experiencing a crisis, please reach out to a qualified professional.
                   </p>
@@ -279,7 +279,7 @@ const Index = () => {
             <div className="text-center text-xs text-muted-foreground font-mono tracking-wider">
               <p className="flex items-center justify-center gap-2">
                 <span className="h-[1px] w-8 bg-jarvis/30" />
-                HACKX TEAM AGENT • POWERED BY ADVANCED AI
+                RAHUL'S AGENT • POWERED BY ADVANCED AI
                 <span className="h-[1px] w-8 bg-jarvis/30" />
               </p>
             </div>
