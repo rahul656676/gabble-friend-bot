@@ -45,9 +45,13 @@ export const useUserPreferences = (sessionId: string) => {
 
   // Load preferences from database
   useEffect(() => {
-    if (!sessionId) return;
+    // If no sessionId yet, just wait (don't mark as loaded yet)
+    if (!sessionId) {
+      return;
+    }
 
     const loadPreferences = async () => {
+      setLoading(true);
       try {
         const { data, error } = await supabase
           .from('user_preferences')
