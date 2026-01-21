@@ -130,7 +130,7 @@ const Index = () => {
           </div>
           
           <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-wider animate-slide-up">
-            <span className="text-gradient text-jarvis-glow animate-pulse">RAHUL'S</span>{" "}
+            <span className="text-gradient text-jarvis-glow animate-pulse">HAWK'S</span>{" "}
             <span className="text-foreground">AGENT</span>
           </h1>
           
@@ -252,7 +252,7 @@ const Index = () => {
                 <div>
                 <h3 className="font-display font-semibold text-foreground mb-2 tracking-wide">SYSTEM NOTICE</h3>
                   <p className="text-sm text-muted-foreground font-light">
-                    Rahul's Agent is an AI companion designed for casual conversation and emotional support.
+                    Hawk's Agent is an AI companion designed for casual conversation and emotional support.
                     It is <strong className="text-foreground">not a substitute for professional mental health care</strong>. 
                     If you're experiencing a crisis, please reach out to a qualified professional.
                   </p>
@@ -279,7 +279,7 @@ const Index = () => {
             <div className="text-center text-xs text-muted-foreground font-mono tracking-wider">
               <p className="flex items-center justify-center gap-2">
                 <span className="h-[1px] w-8 bg-jarvis/30" />
-                RAHUL'S AGENT • POWERED BY ADVANCED AI
+                HAWK'S AGENT • POWERED BY ADVANCED AI
                 <span className="h-[1px] w-8 bg-jarvis/30" />
               </p>
             </div>

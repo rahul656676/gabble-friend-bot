@@ -99,11 +99,11 @@ export const useVoiceAgent = () => {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Browser speech synthesis - reliable and works everywhere
-  const speak = useCallback((text: string): Promise<void> => {
+  // Browser speech synthesis fallback - reliable and works everywhere
+  const speakWithBrowser = useCallback((text: string): Promise<void> => {
     return new Promise<void>((resolve) => {
       if (!('speechSynthesis' in window)) {
-        console.log('Speech synthesis not supported');
+        console.log('Browser speech synthesis not supported');
         resolve();
         return;
       }
@@ -120,7 +120,7 @@ export const useVoiceAgent = () => {
         return;
       }
 
-      console.log('Speaking:', cleanedText.substring(0, 50) + '...');
+      console.log('Using browser TTS for:', cleanedText.substring(0, 50) + '...');
       
       const utterance = new SpeechSynthesisUtterance(cleanedText);
       
@@ -136,7 +136,6 @@ export const useVoiceAgent = () => {
       // Get voices and select the best one
       const getVoicesAndSpeak = () => {
         const voices = window.speechSynthesis.getVoices();
-        console.log('Available voices:', voices.length);
         
         let selectedVoice: SpeechSynthesisVoice | undefined;
 
@@ -153,22 +152,18 @@ export const useVoiceAgent = () => {
         
         if (selectedVoice) {
           utterance.voice = selectedVoice;
-          console.log('Using voice:', selectedVoice.name);
         }
 
         utterance.onstart = () => {
-          console.log('Speech started');
           setIsSpeaking(true);
         };
 
         utterance.onend = () => {
-          console.log('Speech ended');
           setIsSpeaking(false);
           resolve();
         };
 
-        utterance.onerror = (e) => {
-          console.error('Speech error:', e);
+        utterance.onerror = () => {
           setIsSpeaking(false);
           resolve();
         };
@@ -187,6 +182,84 @@ export const useVoiceAgent = () => {
       }
     });
   }, [preferences.voiceRate, preferences.voicePitch, preferences.voiceName, preferences.language]);
+
+  // ElevenLabs TTS with automatic fallback to browser speech
+  const speak = useCallback(async (text: string): Promise<void> => {
+    const cleanedText = cleanTextForSpeech(text);
+    
+    if (!cleanedText.trim()) {
+      return;
+    }
+
+    try {
+      // Try ElevenLabs first
+      console.log('Attempting ElevenLabs TTS...');
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/text-to-speech`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ 
+            text: cleanedText,
+            voiceId: 'EXAVITQu4vr4xnSDxMaL' // Sarah voice
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`ElevenLabs request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (!data.audioContent) {
+        throw new Error('No audio content received');
+      }
+
+      // Play the audio using data URI (browser handles base64 decoding)
+      const audioUrl = `data:audio/mpeg;base64,${data.audioContent}`;
+      
+      // Stop any existing audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      
+      setIsSpeaking(true);
+      
+      audio.onended = () => {
+        setIsSpeaking(false);
+        audioRef.current = null;
+      };
+
+      audio.onerror = () => {
+        // Silently fallback to browser TTS
+        console.log('Audio playback failed, falling back to browser TTS');
+        setIsSpeaking(false);
+        audioRef.current = null;
+        speakWithBrowser(text);
+      };
+
+      await audio.play();
+      
+    } catch (error) {
+      // Silently fallback to browser speech synthesis - no error shown to user
+      console.log('ElevenLabs unavailable, using browser TTS');
+      await speakWithBrowser(text);
+    }
+  }, [speakWithBrowser]);
 
   // Keep speech synthesis alive for long texts (Chrome bug workaround)
   useEffect(() => {
