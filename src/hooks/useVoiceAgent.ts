@@ -168,12 +168,6 @@ export const useVoiceAgent = () => {
   }, []);
 
   const stopSpeaking = useCallback(() => {
-    // Stop ElevenLabs audio if any
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-    // Stop browser speech synthesis
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
