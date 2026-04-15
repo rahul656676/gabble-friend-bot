@@ -536,14 +536,14 @@ export const useVoiceAgent = () => {
       await trackEvent('conversation_started', {});
       
       const greetings: Record<string, string> = {
-        'en-US': "Hello! I'm your AI voice assistant. How can I help you today?",
-        'en-GB': "Hello! I'm your AI voice assistant. How may I assist you?",
-        'hi-IN': "नमस्ते! मैं आपका AI वॉइस असिस्टेंट हूं। मैं आपकी कैसे मदद कर सकता हूं?",
-        'hi-EN': "Namaste! Main aapka AI voice assistant hoon. Aapki kaise help kar sakta hoon?",
-        'es-ES': "¡Hola! Soy tu asistente de voz AI. ¿Cómo puedo ayudarte hoy?",
-        'fr-FR': "Bonjour! Je suis votre assistant vocal IA. Comment puis-je vous aider?",
-        'de-DE': "Hallo! Ich bin Ihr KI-Sprachassistent. Wie kann ich Ihnen helfen?",
-        'pt-BR': "Olá! Sou seu assistente de voz AI. Como posso ajudá-lo?",
+        'en-US': "Hello! I'm Voice Agent, your AI companion. How can I help you today?",
+        'en-GB': "Hello! I'm Voice Agent, your AI companion. How may I assist you?",
+        'hi-IN': "नमस्ते! मैं Voice Agent हूं, आपका AI साथी। मैं आपकी कैसे मदद कर सकता हूं?",
+        'hi-EN': "Namaste! Main Voice Agent hoon, aapka AI companion. Aapki kaise help kar sakta hoon?",
+        'es-ES': "¡Hola! Soy Voice Agent, tu compañero AI. ¿Cómo puedo ayudarte hoy?",
+        'fr-FR': "Bonjour! Je suis Voice Agent, votre compagnon IA. Comment puis-je vous aider?",
+        'de-DE': "Hallo! Ich bin Voice Agent, Ihr KI-Begleiter. Wie kann ich Ihnen helfen?",
+        'pt-BR': "Olá! Sou Voice Agent, seu companheiro AI. Como posso ajudá-lo?",
       };
       
       const greeting = greetings[preferences.language] || greetings['en-US'];
