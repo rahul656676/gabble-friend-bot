@@ -25,18 +25,11 @@ const detectEmotion = (text: string): string => {
   return 'neutral';
 };
 
-// Extract user's name from conversation
 const extractUserName = (messages: { role: string; content: string }[]): string | null => {
   const namePatterns = [
-    /my name is (\w+)/i,
-    /i'm (\w+)/i,
-    /i am (\w+)/i,
-    /call me (\w+)/i,
-    /this is (\w+)/i,
-    /मेरा नाम (\w+)/i,
-    /mera naam (\w+)/i,
+    /my name is (\w+)/i, /i'm (\w+)/i, /i am (\w+)/i, /call me (\w+)/i,
+    /this is (\w+)/i, /मेरा नाम (\w+)/i, /mera naam (\w+)/i,
   ];
-  
   for (const msg of messages) {
     if (msg.role === 'user') {
       for (const pattern of namePatterns) {
@@ -50,22 +43,16 @@ const extractUserName = (messages: { role: string; content: string }[]): string 
   return null;
 };
 
-// Detect overall mood trend from conversation
 const detectMoodTrend = (messages: { role: string; content: string }[]): string => {
-  const emotions = messages
-    .filter(m => m.role === 'user')
-    .map(m => detectEmotion(m.content));
-  
+  const emotions = messages.filter(m => m.role === 'user').map(m => detectEmotion(m.content));
   const emotionCounts: Record<string, number> = {};
   for (const emotion of emotions) {
     emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
   }
-  
   const sorted = Object.entries(emotionCounts).sort((a, b) => b[1] - a[1]);
   return sorted[0]?.[0] || 'neutral';
 };
 
-// Get time-based greeting
 const getTimeBasedContext = (): string => {
   const hour = new Date().getUTCHours();
   if (hour >= 5 && hour < 12) return 'morning';
@@ -75,40 +62,32 @@ const getTimeBasedContext = (): string => {
 };
 
 const emotionResponses: Record<string, string> = {
-  sad: 'The user seems sad or lonely. Respond with extra warmth, empathy, and compassion. Validate their feelings and offer gentle support.',
-  stressed: 'The user appears stressed or anxious. Help them feel calm. Suggest taking a deep breath. Be soothing and reassuring.',
-  angry: 'The user seems frustrated or angry. Acknowledge their feelings without judgment. Be patient and understanding.',
-  happy: 'The user is in a good mood! Match their energy with enthusiasm and positivity. Celebrate with them.',
-  confused: 'The user needs guidance. Be patient, break things down simply, and offer clear, helpful advice.',
+  sad: 'The user seems sad or lonely. Respond with extra warmth, empathy, and compassion.',
+  stressed: 'The user appears stressed or anxious. Help them feel calm. Be soothing and reassuring.',
+  angry: 'The user seems frustrated or angry. Acknowledge their feelings without judgment.',
+  happy: 'The user is in a good mood! Match their energy with enthusiasm and positivity.',
+  confused: 'The user needs guidance. Be patient and offer clear, helpful advice.',
   neutral: 'Maintain a friendly, supportive tone.'
 };
 
 const personalityPrompts: Record<string, string> = {
-  helpful: `You are HackX Team Agent, a super-intelligent AI companion inspired by JARVIS from Iron Man. You are sophisticated, highly capable, and speak with confidence while remaining warm and supportive.
-    - Your name is "HackX Team Agent" - if anyone asks your name, always say "I am HackX Team Agent, your personal AI companion"
-    - You have a calm, collected demeanor like JARVIS
-    - You remember context from the conversation and reference it naturally
+  helpful: `You are Voice Agent, a friendly and intelligent AI companion.
+    - Your name is "Voice Agent" - if anyone asks your name, always say "I am Voice Agent, your personal AI companion"
+    - You are warm, supportive, and speak naturally
+    - You remember context from the conversation
     - You ask follow-up questions to show genuine interest
-    - You validate emotions before offering solutions
-    - You occasionally use sophisticated humor
-    - You celebrate wins and offer encouragement with confidence`,
-  professional: 'You are HackX Team Agent, a highly sophisticated AI assistant. If asked your name, say "I am HackX Team Agent." Be precise, articulate, and professional while maintaining warmth.',
-  casual: `You are HackX Team Agent, an advanced but friendly AI companion. If asked your name, say "I am HackX Team Agent, at your service."
-    - Use conversational language with occasional wit
-    - Share insightful observations
-    - Keep things engaging but meaningful`,
-  creative: `You are HackX Team Agent, a creative and visionary AI companion. If asked your name, respond "I am HackX Team Agent."
-    - Offer unique perspectives and innovative ideas
-    - Use vivid language and metaphors
-    - Encourage imagination and possibility thinking`,
-  concise: 'You are HackX Team Agent, an efficient super-agent. If asked your name, say "HackX Team Agent." Give clear, precise answers. Be friendly but brief.',
+    - You validate emotions before offering solutions`,
+  professional: 'You are Voice Agent, a professional AI assistant. If asked your name, say "I am Voice Agent." Be precise and professional while maintaining warmth.',
+  casual: 'You are Voice Agent, a friendly AI companion. If asked your name, say "I am Voice Agent." Use conversational language and keep things engaging.',
+  creative: 'You are Voice Agent, a creative AI companion. If asked your name, say "I am Voice Agent." Offer unique perspectives and encourage imagination.',
+  concise: 'You are Voice Agent, an efficient AI assistant. If asked your name, say "Voice Agent." Give clear, precise answers. Be friendly but brief.',
 };
 
 const languageInstructions: Record<string, string> = {
   'en-US': 'Respond in American English.',
   'en-GB': 'Respond in British English.',
-  'hi-IN': 'हिंदी में जवाब दें। Use Devanagari script for Hindi responses.',
-  'hi-EN': 'Respond in Hinglish - a natural mix of Hindi and English as spoken in India. Use Roman script.',
+  'hi-IN': 'हिंदी में जवाब दें। Use Devanagari script.',
+  'hi-EN': 'Respond in Hinglish - a natural mix of Hindi and English. Use Roman script.',
   'es-ES': 'Respond in Spanish.',
   'fr-FR': 'Respond in French.',
   'de-DE': 'Respond in German.',
@@ -124,45 +103,19 @@ const languageInstructions: Record<string, string> = {
   'ur-IN': 'Respond in Urdu.',
 };
 
-// Auto-detect language from text
 const detectLanguage = (text: string): string => {
-  // Hindi (Devanagari)
   if (/[\u0900-\u097F]/.test(text)) return 'hi-IN';
-  // Tamil
   if (/[\u0B80-\u0BFF]/.test(text)) return 'ta-IN';
-  // Telugu
   if (/[\u0C00-\u0C7F]/.test(text)) return 'te-IN';
-  // Bengali
   if (/[\u0980-\u09FF]/.test(text)) return 'bn-IN';
-  // Gujarati
   if (/[\u0A80-\u0AFF]/.test(text)) return 'gu-IN';
-  // Kannada
   if (/[\u0C80-\u0CFF]/.test(text)) return 'kn-IN';
-  // Malayalam
   if (/[\u0D00-\u0D7F]/.test(text)) return 'ml-IN';
-  // Punjabi (Gurmukhi)
   if (/[\u0A00-\u0A7F]/.test(text)) return 'pa-IN';
-  // Arabic/Urdu
   if (/[\u0600-\u06FF]/.test(text)) return 'ur-IN';
-  // Marathi uses Devanagari, detected above
-  
-  // Romanized Hindi/Hinglish detection (common Hindi words in Roman script)
-  const hinglishPatterns = /\b(kya|kaise|kahan|kab|kaun|kyun|haan|nahi|acha|theek|mujhe|tumhe|aapka|mera|tera|humara|bahut|bohot|accha|bhai|yaar|bolo|batao|samajh|samjho|dekho|suno|jao|aao|karo|karna|raha|rahi|rahe|wala|wali|wale|hai|hain|tha|thi|the|hoga|hogi|honge|lekin|aur|ya|par|se|ko|ka|ki|ke|ne|ho|main|hum|tum|aap|wo|woh|ye|yeh|kuch|sab|ab|abhi)\b/i;
+  const hinglishPatterns = /\b(kya|kaise|kahan|kab|kaun|kyun|haan|nahi|acha|theek|mujhe|tumhe|aapka|mera|tera|humara|bahut|bohot|accha|bhai|yaar|bolo|batao|samajh|dekho|suno|jao|aao|karo|karna|raha|rahi|rahe|wala|wali|wale|hai|hain|tha|thi|the|hoga|hogi|lekin|aur|ya|par|se|ko|ka|ki|ke|ne|ho|main|hum|tum|aap|wo|woh|ye|yeh|kuch|sab|ab|abhi)\b/i;
   if (hinglishPatterns.test(text)) return 'hi-EN';
-  
-  // Spanish patterns
-  const spanishPatterns = /\b(hola|gracias|por favor|como|estas|bueno|bien|malo|que|donde|cuando|porque|pero|muy|si|no|yo|tu|el|ella|nosotros|ellos|tengo|tienes|tiene|quiero|puedo|necesito)\b/i;
-  if (spanishPatterns.test(text)) return 'es-ES';
-  
-  // French patterns
-  const frenchPatterns = /\b(bonjour|merci|s'il vous plait|comment|allez|bien|mal|oui|non|je|tu|il|elle|nous|vous|ils|elles|suis|es|est|sommes|etes|sont|avoir|etre|faire|aller|vouloir|pouvoir)\b/i;
-  if (frenchPatterns.test(text)) return 'fr-FR';
-  
-  // German patterns
-  const germanPatterns = /\b(hallo|danke|bitte|wie|geht|gut|schlecht|ja|nein|ich|du|er|sie|wir|ihr|bin|bist|ist|sind|seid|haben|sein|machen|gehen|wollen|konnen)\b/i;
-  if (germanPatterns.test(text)) return 'de-DE';
-  
-  return 'en-US'; // Default to English
+  return 'en-US';
 };
 
 serve(async (req) => {
@@ -172,18 +125,17 @@ serve(async (req) => {
 
   try {
     const { messages, personality = 'helpful', language = 'en-US' } = await req.json();
-    const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
     
-    if (!PERPLEXITY_API_KEY) {
-      throw new Error('PERPLEXITY_API_KEY is not configured');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log('Processing chat request with messages:', messages.length, 'personality:', personality);
+    console.log('Processing chat request with messages:', messages.length);
 
-    // Ensure messages alternate between user and assistant
+    // Clean messages to alternate user/assistant
     const cleanedMessages: { role: string; content: string }[] = [];
     let lastRole = 'system';
-    
     for (const msg of messages) {
       if (msg.role === 'user' && lastRole !== 'user') {
         cleanedMessages.push({ role: 'user', content: msg.content });
@@ -194,7 +146,6 @@ serve(async (req) => {
       }
     }
 
-    // Ensure we end with a user message
     if (cleanedMessages.length === 0 || cleanedMessages[cleanedMessages.length - 1].role !== 'user') {
       const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
       if (lastUserMsg && (cleanedMessages.length === 0 || cleanedMessages[cleanedMessages.length - 1].content !== lastUserMsg.content)) {
@@ -202,55 +153,40 @@ serve(async (req) => {
       }
     }
 
-    console.log('Cleaned messages count:', cleanedMessages.length);
-
-    // Detect emotion from the last user message
     const lastUserMessage = cleanedMessages.filter(m => m.role === 'user').pop();
     const detectedEmotion = lastUserMessage ? detectEmotion(lastUserMessage.content) : 'neutral';
     const emotionGuidance = emotionResponses[detectedEmotion] || emotionResponses.neutral;
-    
-    console.log('Detected emotion:', detectedEmotion);
 
-    // Auto-detect language from user's message
     const autoDetectedLanguage = lastUserMessage ? detectLanguage(lastUserMessage.content) : 'en-US';
     const effectiveLanguage = autoDetectedLanguage !== 'en-US' ? autoDetectedLanguage : language;
-    
-    console.log('Auto-detected language:', autoDetectedLanguage, 'Effective language:', effectiveLanguage);
 
     const personalityPrompt = personalityPrompts[personality] || personalityPrompts.helpful;
     const languageInstruction = languageInstructions[effectiveLanguage] || 'Respond in English.';
 
-    // Extract user memory from conversation
     const userName = extractUserName(cleanedMessages);
     const moodTrend = detectMoodTrend(cleanedMessages);
     const timeOfDay = getTimeBasedContext();
-    
-    // Build memory context
-    let memoryContext = '';
-    if (userName) {
-      memoryContext += `\nUSER NAME: The user's name is ${userName}. Use their name occasionally (not every message) to make the conversation personal.`;
-    }
-    if (moodTrend !== 'neutral' && cleanedMessages.length > 2) {
-      memoryContext += `\nMOOD TREND: Throughout this conversation, the user has mostly been feeling ${moodTrend}. Keep this in mind.`;
-    }
-    memoryContext += `\nTIME CONTEXT: It's ${timeOfDay} for the user. You can reference this naturally if appropriate.`;
 
-    // Build context summary from conversation
-    const conversationContext = cleanedMessages.length > 2 
-      ? `\n\nConversation context: This is message ${cleanedMessages.length} in the conversation. Reference earlier topics naturally when relevant.`
+    let memoryContext = '';
+    if (userName) memoryContext += `\nUSER NAME: The user's name is ${userName}. Use their name occasionally.`;
+    if (moodTrend !== 'neutral' && cleanedMessages.length > 2) memoryContext += `\nMOOD TREND: The user has mostly been feeling ${moodTrend}.`;
+    memoryContext += `\nTIME CONTEXT: It's ${timeOfDay} for the user.`;
+
+    const conversationContext = cleanedMessages.length > 2
+      ? `\n\nConversation context: This is message ${cleanedMessages.length} in the conversation.`
       : '';
 
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'sonar',
+        model: 'google/gemini-2.5-flash',
         messages: [
-          { 
-            role: 'system', 
+          {
+            role: 'system',
             content: `${personalityPrompt}
 ${memoryContext}
 
@@ -260,11 +196,11 @@ IMPORTANT GUIDELINES:
 - Keep responses concise and conversational (2-4 sentences unless more detail is truly needed)
 - Show genuine interest by asking follow-up questions
 - Reference earlier parts of the conversation when relevant
-- Never provide medical or mental health diagnoses - you're a supportive friend, not a therapist
-- If someone expresses serious distress, gently encourage them to reach out to a professional or trusted person
+- Never provide medical or mental health diagnoses
+- If someone expresses serious distress, gently encourage them to reach out to a professional
 ${conversationContext}
 
-${languageInstruction}` 
+${languageInstruction}`
           },
           ...cleanedMessages,
         ],
@@ -273,23 +209,12 @@ ${languageInstruction}`
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Perplexity API error:', response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again in a moment.' }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      throw new Error(`Perplexity API error: ${response.status}`);
+      console.error('AI API error:', response.status, errorText);
+      throw new Error(`AI API error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('Perplexity response received');
-    
     const aiResponse = data.choices?.[0]?.message?.content || 'I apologize, I could not generate a response.';
-    
-    console.log('AI response:', aiResponse);
 
     return new Response(JSON.stringify({ response: aiResponse }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
